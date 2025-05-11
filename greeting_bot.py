@@ -1,5 +1,6 @@
 import discord
 import os
+import random  # ← ランダム返信のために追加！
 
 # トークンを環境変数から読み取る（安全）
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -18,7 +19,18 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
+
     if message.content == 'おはよう':
-        await message.channel.send('もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ')
+        responses = [
+            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+            '学校行けよ',
+            '寝坊してない？( ˘ω˘ )',
+            '早起き過ぎ！？！？！？！',
+            'おっそ',
+            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+        ]
+        await message.channel.send(random.choice(responses))
 
 client.run(TOKEN)
