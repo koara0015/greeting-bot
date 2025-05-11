@@ -1,8 +1,8 @@
 import discord
 import os
-import random  # ← ランダム返信のために追加！
+import random  # ランダム返信のために必要！
 
-# トークンを環境変数から読み取る（安全）
+# トークンを環境変数から読み取る
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # メッセージを読むための設定
@@ -30,6 +30,18 @@ async def on_message(message):
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+        ]
+        await message.channel.send(random.choice(responses))
+
+    elif message.content == 'おやすみ':
+        responses = [
+            'おやすみ',
+            'いい夢見てね！',
+            '今日もnukeされずに済んだね！',
+            'おやすみのnukeは？',
+            'おつかれさま、ゆっくり休んでね〜',
+            'おやすみ〜',
+            'もう起きてこなくていいよ'
         ]
         await message.channel.send(random.choice(responses))
 
