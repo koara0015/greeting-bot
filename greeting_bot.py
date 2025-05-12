@@ -1,8 +1,9 @@
-import discord
-import os
-import random
-import asyncio
-from datetime import datetime
+# 必要なライブラリをインポート
+import discord       # Discordの機能を使うため
+import os            # トークンを環境変数から読み取るため
+import random        # ランダムで返事を選ぶため
+import asyncio       # 時間を待つため（sleep関数など）
+import datetime      # 日時を扱うため
 
 # 環境変数からトークンを取得（セキュリティのため、コードに直接書かない）
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -14,13 +15,8 @@ intents.message_content = True
 # Bot本体を作成
 client = discord.Client(intents=intents)
 
-# ユーザーIDと実行日時を記録
-user_last_used = {}
-
-# おみくじ結果
-omikuji_results = [
-    "大吉", "吉", "中吉", "小吉", "末吉", "凶", "大凶", "特大凶"
-]
+# 最後におみくじを引いた日時を記録
+last_used_date = None
 
 # Botが起動したときに実行される処理
 @client.event
@@ -40,6 +36,8 @@ async def on_ready():
 # メッセージを受け取ったときに呼ばれる処理
 @client.event
 async def on_message(message):
+    global last_used_date  # グローバル変数として扱う
+
     if message.author.bot:
         return  # 他のBotのメッセージは無視する
 
@@ -121,7 +119,7 @@ async def on_message(message):
             embed.add_field(name="🟢 t!shutdown", value="Botを終了します（管理者限定）", inline=False)
             embed.add_field(name="🟢 t!restart", value="Botを再起動します（管理者限定）", inline=False)
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!omikuji", value="おみくじを引きます（1日1回限定）", inline=False)
+            embed.add_field(name="🟢 t!omikuji", value="1日1回おみくじを引きます（管理者限定）", inline=False)
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
@@ -194,11 +192,23 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
-    # おみくじコマンド
-    if message.content.startswith('t!omikuji'):
-        # ユーザーが1日1回の制限を超えていないか確認
-        user_id = message.author.id
-        today = datetime.today().date()
+    # おみくじを引くコマンド
+    if message.content == 't!omikuji':
+        global last_used_date
 
-        if user_id in user_last_used:
-            last_used_date =
+        # 1日に1回しか引けない制限を確認
+        if last_used_date and (datetime.datetime.now() - last_used_date).days < 1:
+            await message.channel.send("おみくじは1日1回限定です。")
+        else:
+            # おみくじの結果
+            results = ["大吉", "吉", "中吉", "小吉", "末吉", "凶", "大凶", "特大凶"]
+            result = random.choice(results)
+
+            # おみくじの結果を送信
+            await message.channel.send(f"あなたのおみくじの結果は「{result}」です！")
+
+            # 最後に引いた日時を更新
+            last_used_date = datetime.datetime.now()
+
+# Botの起動
+client.run(TOKEN)
