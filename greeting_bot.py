@@ -119,7 +119,8 @@ async def on_message(message):
             embed.add_field(name="🟢 t!shutdown", value="Botを終了します（管理者限定）", inline=False)
             embed.add_field(name="🟢 t!restart", value="Botを再起動します（管理者限定）", inline=False)
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!omikuji", value="1日1回おみくじを引きます（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!omikuji", value="1日1回おみくじを引きます（誰でも可）", inline=False)
+            embed.add_field(name="🟢 t!ai [質問]", value="質問をしたら適当に返信します（誰でも可）", inline=False)
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
