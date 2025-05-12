@@ -18,6 +18,18 @@ client = discord.Client(intents=intents)
 # おみくじの使用履歴（ユーザーID: 最後の使用日）
 omikuji_usage = {}
 
+# AIの返答候補
+ai_responses = [
+    "それは面白い質問ですね！でも考え中です🤔",
+    "ちょっと分かりませんが、チョコ食べたいですね！🍫",
+    "にゃーんฅ^•ﻌ•^ฅ",
+    "そんなことよりゲームしようぜ🎮",
+    "それは心の中に答えがあると思います🌟",
+    "ちょっとよくわからないけど、きっと大丈夫！",
+    "それ、Googleで検索したら出るよ！",
+    "全知全能のAIです！（嘘）"
+]
+
 # Botが起動したときに実行される処理
 @client.event
 async def on_ready():
@@ -83,7 +95,7 @@ async def on_message(message):
                     await message.channel.send("✅ メッセージを送信しました")
                     log_channel = client.get_channel(notify_channel_id)
                     if log_channel:
-                        await log_channel.send(f"{message.author.display_name} が sayコマンドを使用して「{parts[2]}」を送信しました。")
+                        await log_channel.send(f"{message.author.display_name} がsayコマンドを使用して『{parts[2]}』を送信しました。")
                 else:
                     await message.channel.send("⚠️ チャンネルが見つかりませんでした")
             except Exception as e:
@@ -92,32 +104,78 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
-    if message.content.startswith("t!ai"):
-        question = message.content[5:].strip()
-        if not question:
-            await message.channel.send("🤖 何か質問してくれないと、答えられません！")
-            return
-
-        fake_responses = [
-            "なるほど、それは非常に興味深いですね……！",
-            "うーん、それについては哲学的な問いですね。",
-            "あなたの感性はとてもユニークです！",
-            "もう少しデータが必要ですね🤔",
-            "考えてみましたが、お腹が空いたのでやめました。",
-            "GPT-999に相談してみます。",
-            "その質問、実は宇宙の真理に触れてます。",
-            "……その件についてはノーコメントで。",
-            "AIでも恋愛は難しいんです…🥺",
-            f"「{question}」についてですが、それはつまり……わかりません！"
-        ]
-
-        await message.channel.send(random.choice(fake_responses))
-
-        log_channel = client.get_channel(notify_channel_id)
-        if log_channel:
-            await log_channel.send(f"{message.author.display_name} が aiコマンドを使用しました。")
+    if message.content == 't!help':
+        if message.author.id == admin_id:
+            embed = discord.Embed(
+                title="🤖 コマンド一覧",
+                description="このBotで使えるコマンド一覧です！",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="🟢 t!help", value="コマンド一覧を表示します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!shutdown", value="Botを終了します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!restart", value="Botを再起動します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
+            embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!ai [メッセージ]", value="AIっぽく返事します（誰でも可）", inline=False)
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send("⚠️ 権限がありません")
         return
 
-    # ※このあとに t!help, t!omikuji, t!yamu などが続く（省略）
+    if message.content.startswith('t!ai'):
+        log_channel = client.get_channel(notify_channel_id)
+        if log_channel:
+            await log_channel.send(f"{message.author.display_name} がaiコマンドを使用しました。")
+        response = random.choice(ai_responses)
+        await message.channel.send(response)
+        return
 
+    if message.content == 't!omikuji':
+        today = datetime.now().date()
+        user_id = message.author.id
+        last_used = omikuji_usage.get(user_id)
+        if last_used == today:
+            await message.channel.send("おみくじは1日1回限定です。")
+            return
+        omikuji_usage[user_id] = today
+        fortunes = {
+            "特大凶": ["地獄の始まり。今日の運勢は0です", "逆にレアだと思えば……？", "もう寝よう！"],
+            "大凶":   ["今日はなにもかもが裏目に出る日…", "一歩踏み出す前に3回深呼吸して", "今日はおとなしくしていよう"],
+            "凶":     ["なんかうまくいかない気がする…", "でも気をつけてれば大丈夫！たぶん！", "まあ、凶ならまだマシよ"],
+            "末吉":   ["ちょっと運がある。ちょっとだけ", "結果は努力次第！", "タイミングを見極めよう"],
+            "小吉":   ["小さな幸せに気づける日", "いいこともある。たぶん", "今日は地味に良い日！"],
+            "中吉":   ["なかなかいい感じの運勢！", "落ち着いて行動すれば吉", "流れに乗れ！"],
+            "吉":     ["いいことありそう！", "ラッキーアイテムはチョコ", "ちょっと自信を持ってみよう！"],
+            "大吉":   ["最高の一日になる！", "思い切って行動してみよう！", "やるなら今！"]
+        }
+        result = random.choice(list(fortunes.keys()))
+        comment = random.choice(fortunes[result])
+        await message.channel.send(f"🎴 おみくじの結果：**{result}**！\n{comment}")
+        log_channel = client.get_channel(notify_channel_id)
+        if log_channel:
+            await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
+        return
+
+    if 'おはよ' in message.content:
+        responses = [
+            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+            '学校行けよ',
+            '寝坊してない？( ˘⁠ω˘ )',
+            '早起き過ぎ！？！？！？！',
+            'おっそ'
+        ]
+        await message.channel.send(random.choice(responses))
+
+    elif 'おやすみ' in message.content:
+        responses = [
+            'おやすみ',
+            'いい夢見てね！',
+            '今日もnukeされずに済んだね！',
+            'おやすみのnukeは？',
+            'おつかれさま、ゆっくり休んでね〜'
+        ]
+        await message.channel.send(random.choice(responses))
+
+# Botを起動
 client.run(TOKEN)
