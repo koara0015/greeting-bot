@@ -2,7 +2,7 @@ import discord
 import os
 import random  # ランダム返信のために必要！
 
-# トークンを環境変数から読み取る
+# トークンを環境変数から読み取る（安全）
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # メッセージを読むための設定
@@ -15,14 +15,21 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print(f'ログインしました：{client.user}')
 
-    # ログイン時に指定チャンネルにメッセージ送信
-    channel_id = 1371322394719031396  # あなたのチャンネルID
-    channel = client.get_channel(channel_id)
+    # 起動メッセージを送るチャンネルID
+    channel_id = 1371322394719031396
 
+    # Botの準備が整うのを明示的に待つ（安全対策）
+    await client.wait_until_ready()
+
+    # チャンネル取得して送信（失敗してもBotが止まらないように保護）
+    channel = client.get_channel(channel_id)
     if channel:
-        await channel.send("起動しました")
+        try:
+            await channel.send("起動しました")
+        except Exception as e:
+            print(f"チャンネルへの送信に失敗しました: {e}")
     else:
-        print("⚠️ チャンネルが見つかりません。Botがそのサーバーにいないか、権限が足りない可能性があります。")
+        print("⚠️ チャンネルが見つかりません（Botがサーバーにいないか、権限が足りない可能性があります）")
 
 @client.event
 async def on_message(message):
