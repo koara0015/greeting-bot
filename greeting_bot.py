@@ -54,6 +54,23 @@ async def on_message(message):
             await client.close()
             return
 
+        elif message.content.startswith('!say'):
+            parts = message.content.split(' ', 2)
+            if len(parts) < 3:
+                await message.channel.send("使い方：!say [チャンネルID] [メッセージ]")
+            else:
+                try:
+                    channel_id = int(parts[1])
+                    target_channel = client.get_channel(channel_id)
+                    if target_channel:
+                        await target_channel.send(parts[2])
+                        await message.channel.send("✅ メッセージを送信しました")
+                    else:
+                        await message.channel.send("⚠️ チャンネルが見つかりませんでした")
+                except Exception as e:
+                    await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+            return
+
     # 「おはよ」に反応
     if 'おはよ' in message.content:
         responses = [
