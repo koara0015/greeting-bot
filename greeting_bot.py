@@ -41,7 +41,8 @@ async def on_message(message):
             'おやすみのnukeは？',
             'おつかれさま、ゆっくり休んでね〜',
             'おやすみ〜',
-            'もう起きてこなくていいよ'
+            'もう起きてこなくていいよ',
+            '進捗達成！「いい夢見てね」'
         ]
         await message.channel.send(random.choice(responses))
 
