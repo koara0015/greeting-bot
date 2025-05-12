@@ -16,7 +16,7 @@ async def on_ready():
     print(f'ログインしました：{client.user}')
 
     # ログイン時に指定チャンネルにメッセージ送信
-    channel_id = 1371322394719031396  # あなたのチャンネルID
+    channel_id = 1371322394719031396  # 通知を送るチャンネルID
     channel = client.get_channel(channel_id)
 
     if channel:
@@ -57,4 +57,12 @@ async def on_message(message):
         ]
         await message.channel.send(random.choice(responses))
 
-client.run(TOKEN)
+    # シャットダウンコマンド（あなただけ）
+    elif message.content == '!shutdown' and message.author.id == 1150048383524941826:
+        await message.channel.send("終了しました")
+        await client.close()
+
+    # 再起動コマンド（あなただけ）
+    elif message.content == '!restart' and message.author.id == 1150048383524941826:
+        await message.channel.send("再起動します")
+        await client.close()  # 実際はRailwayなどで自動再起動
