@@ -20,7 +20,8 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    if message.content == 'おはよう':
+    # 「おはよう」を含む文に反応
+    if 'おはよう' in message.content:
         responses = [
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
             '学校行けよ',
@@ -33,7 +34,8 @@ async def on_message(message):
         ]
         await message.channel.send(random.choice(responses))
 
-    elif message.content == 'おやすみ':
+    # 「おやすみ」を含む文に反応
+    elif 'おやすみ' in message.content:
         responses = [
             'おやすみ',
             'いい夢見てね！',
