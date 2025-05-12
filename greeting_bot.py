@@ -78,6 +78,22 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
+    if message.content == '!help':
+        if message.author.id == admin_id:
+            embed = discord.Embed(
+                title="🤖 コマンド一覧",
+                description="このBotで使えるコマンド一覧です！",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="🟢 !help", value="コマンド一覧を表示します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 !say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（管理者限定）", inline=False)
+            embed.add_field(name="🟢 !shutdown", value="Botを終了します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 !restart", value="Botを再起動します（管理者限定）", inline=False)
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send("⚠️ 権限がありません")
+        return
+
     # ==== 一般返信 ====
     if 'おはよ' in message.content:
         responses = [
