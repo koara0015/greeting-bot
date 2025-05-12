@@ -93,6 +93,24 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
+    # t!help コマンド（コマンド一覧を表示）
+    if message.content == 't!help':
+        if message.author.id == admin_id:
+            embed = discord.Embed(
+                title="🤖 コマンド一覧",
+                description="このBotで使えるコマンド一覧です！",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="🟢 t!help", value="コマンド一覧を表示します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!shutdown", value="Botを終了します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!restart", value="Botを再起動します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send("⚠️ 権限がありません")
+        return
+
     # t!omikuji コマンド（おみくじ）
     if message.content == 't!omikuji':
         today = datetime.now().date()
