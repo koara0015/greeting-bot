@@ -152,7 +152,7 @@ async def on_message(message):
 
                 for line in lines:
                     await target_channel.send(line)
-                    await asyncio.sleep(0.5)
+                    await asyncio.sleep(0.1)
 
             except Exception as e:
                 await message.channel.send(f"⚠️ エラーが発生しました: {e}")
