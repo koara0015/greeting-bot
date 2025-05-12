@@ -15,6 +15,15 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print(f'ログインしました：{client.user}')
 
+    # ログイン時に指定チャンネルにメッセージ送信
+    channel_id = 1371322394719031396  # あなたのチャンネルID
+    channel = client.get_channel(channel_id)
+
+    if channel:
+        await channel.send("起動しました")
+    else:
+        print("⚠️ チャンネルが見つかりません。Botがそのサーバーにいないか、権限が足りない可能性があります。")
+
 @client.event
 async def on_message(message):
     if message.author.bot:
