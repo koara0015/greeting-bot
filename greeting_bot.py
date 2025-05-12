@@ -1,3 +1,28 @@
+import discord
+import os
+import random
+
+TOKEN = os.getenv("DISCORD_TOKEN")
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f'ログインしました：{client.user}')
+    channel_id = 1371322394719031396
+    await client.wait_until_ready()
+    channel = client.get_channel(channel_id)
+    if channel:
+        try:
+            await channel.send("起動しました")
+        except Exception as e:
+            print(f"チャンネルへの送信に失敗しました: {e}")
+    else:
+        print("⚠️ チャンネルが見つかりません")
+
 @client.event
 async def on_message(message):
     if message.author.bot:
@@ -79,3 +104,5 @@ async def on_message(message):
             '進捗達成！「いい夢見てね」'
         ]
         await message.channel.send(random.choice(responses))
+
+client.run(TOKEN)
