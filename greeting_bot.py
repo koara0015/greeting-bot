@@ -15,22 +15,13 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print(f'ログインしました：{client.user}')
 
-    # ログイン時に指定チャンネルにメッセージ送信
-    channel_id = 1371322394719031396  # 通知を送るチャンネルID
-    channel = client.get_channel(channel_id)
-
-    if channel:
-        await channel.send("起動しました")
-    else:
-        print("⚠️ チャンネルが見つかりません。Botがそのサーバーにいないか、権限が足りない可能性があります。")
-
 @client.event
 async def on_message(message):
     if message.author.bot:
         return
 
-    # 「おはよ」を含む文に反応
-    if 'おはよ' in message.content:
+    # 「おはよう」を含む文に反応
+    if 'おはよう' in message.content:
         responses = [
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
             '学校行けよ',
@@ -57,12 +48,4 @@ async def on_message(message):
         ]
         await message.channel.send(random.choice(responses))
 
-    # シャットダウンコマンド（あなただけ）
-    elif message.content == '!shutdown' and message.author.id == 1150048383524941826:
-        await message.channel.send("終了しました")
-        await client.close()
-
-    # 再起動コマンド（あなただけ）
-    elif message.content == '!restart' and message.author.id == 1150048383524941826:
-        await message.channel.send("再起動します")
-        await client.close()  # 実際はRailwayなどで自動再起動
+client.run(TOKEN)
