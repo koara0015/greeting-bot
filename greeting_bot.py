@@ -30,6 +30,14 @@ async def on_message(message):
 
     admin_id = 1150048383524941826
     notify_channel_id = 1371322394719031396
+    react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネル
+
+    # === 👍リアクション機能 ===
+    if message.channel.id == react_channel_id:
+        try:
+            await message.add_reaction("👍")
+        except Exception as e:
+            print(f"リアクション失敗: {e}")
 
     # ==== 管理者コマンド ====
     if message.content.startswith('t!shutdown'):
