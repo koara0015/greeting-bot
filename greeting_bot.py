@@ -20,8 +20,8 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # 「おはよう」を含む文に反応
-    if 'おはよう' in message.content:
+    # 「おはよ」を含む文に反応
+    if 'おはよ' in message.content:
         responses = [
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
             '学校行けよ',
