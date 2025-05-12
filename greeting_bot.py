@@ -32,7 +32,7 @@ async def on_message(message):
     notify_channel_id = 1371322394719031396
 
     # ==== 管理者コマンド ====
-    if message.content.startswith('!shutdown'):
+    if message.content.startswith('m!shutdown'):
         if message.author.id == admin_id:
             notify_channel = client.get_channel(notify_channel_id)
             if notify_channel:
@@ -45,7 +45,7 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
-    if message.content.startswith('!restart'):
+    if message.content.startswith('m!restart'):
         if message.author.id == admin_id:
             notify_channel = client.get_channel(notify_channel_id)
             if notify_channel:
@@ -58,11 +58,11 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
-    if message.content.startswith('!say'):
+    if message.content.startswith('m!say'):
         if message.author.id == admin_id:
             parts = message.content.split(' ', 2)
             if len(parts) < 3:
-                await message.channel.send("使い方：!say [チャンネルID] [メッセージ]")
+                await message.channel.send("使い方：m!say [チャンネルID] [メッセージ]")
             else:
                 try:
                     channel_id = int(parts[1])
@@ -78,17 +78,17 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
-    if message.content == '!help':
+    if message.content == 'm!help':
         if message.author.id == admin_id:
             embed = discord.Embed(
                 title="🤖 コマンド一覧",
                 description="このBotで使えるコマンド一覧です！",
                 color=discord.Color.green()
             )
-            embed.add_field(name="🟢 !help", value="コマンド一覧を表示します（管理者限定）", inline=False)
-            embed.add_field(name="🟢 !say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（管理者限定）", inline=False)
-            embed.add_field(name="🟢 !shutdown", value="Botを終了します（管理者限定）", inline=False)
-            embed.add_field(name="🟢 !restart", value="Botを再起動します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 m!help", value="コマンド一覧を表示します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 m!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（管理者限定）", inline=False)
+            embed.add_field(name="🟢 m!shutdown", value="Botを終了します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 m!restart", value="Botを再起動します（管理者限定）", inline=False)
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
