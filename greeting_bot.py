@@ -113,27 +113,41 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
-    # t!user コマンド（ユーザー情報を表示・管理者限定）
-    if message.content == 't!user':
+        # t!user コマンド（ユーザー情報を表示・管理者限定）
+    if message.content.startswith('t!user'):
         if message.author.id == admin_id:
-            user = message.author
-            member = message.guild.get_member(user.id)
+            parts = message.content.split()
+            # デフォルトでは実行者
+            target_user = message.author
+            target_member = message.guild.get_member(target_user.id)
+
+            # ユーザーIDが指定された場合
+            if len(parts) == 2:
+                try:
+                    user_id = int(parts[1])
+                    target_user = await client.fetch_user(user_id)
+                    target_member = message.guild.get_member(user_id)
+                except:
+                    await message.channel.send("⚠️ ユーザーが見つかりませんでした。")
+                    return
+
             embed = discord.Embed(
-                title=f"🧑‍💼 ユーザー情報：{user.name}",
+                title=f"🧑‍💼 ユーザー情報：{target_user.name}",
                 color=discord.Color.blue()
             )
-            embed.add_field(name="ユーザー名", value=user.name, inline=False)
-            embed.add_field(name="ユーザーID", value=user.id, inline=False)
-            embed.add_field(name="アカウント作成日", value=user.created_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
+            embed.add_field(name="ユーザー名", value=target_user.name, inline=False)
+            embed.add_field(name="ユーザーID", value=target_user.id, inline=False)
+            embed.add_field(name="アカウント作成日", value=target_user.created_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
             embed.add_field(
                 name="サーバー参加日",
-                value=member.joined_at.strftime('%Y-%m-%d %H:%M:%S') if member and member.joined_at else "不明",
+                value=target_member.joined_at.strftime('%Y-%m-%d %H:%M:%S') if target_member and target_member.joined_at else "不明",
                 inline=False
             )
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
         return
+
 
     
     # t!yamu コマンド（病み構文を一気に投稿）
