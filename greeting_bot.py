@@ -3,7 +3,7 @@ import discord       # Discordの機能を使うため
 import os            # トークンを環境変数から読み取るため
 import random        # ランダムで返事を選ぶため
 import asyncio       # 時間を待つため（sleep関数など）
-import openai  # ChatGPTを使うためのライブラリ
+from openai import OpenAI # aichatを使うため
 from datetime import datetime
 
 # トークンを環境変数から取得（セキュリティのため、コードに直接書かない）
@@ -257,35 +257,34 @@ async def on_message(message):
             await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
         return
 
-        # t!chatgpt コマンド（ChatGPTと会話）※誰でも使用可能、特定チャンネル限定
-    if message.content.startswith('t!chatgpt'):
-        allowed_channel_id = 1125349350197964892  # 使用できるチャンネルのID
-
-        # チャンネルが指定されたもの以外なら拒否
+    # t!chatgpt コマンド（ChatGPTに質問する）
+    if message.content.startswith("t!chatgpt"):
+        allowed_channel_id = 1125349350197964892  # ChatGPT専用チャンネルのID
         if message.channel.id != allowed_channel_id:
             await message.channel.send("⚠️ AIchatのチャンネル外では、このコマンドは機能しません。")
             return
 
-        prompt = message.content[10:].strip()
-        if not prompt:
-            await message.channel.send("使い方：t!chatgpt [質問やメッセージ]")
+        question = message.content[10:].strip()
+        if not question:
+            await message.channel.send("使い方：t!chatgpt [質問内容]")
             return
 
         try:
-            # ChatGPT APIを呼び出して返信を取得
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",  # モデルの指定（gpt-4にしたい場合はここを変更）
-                messages=[
-                    {"role": "system", "content": "あなたは優しくて面白いDiscord Botです。"},
-                    {"role": "user", "content": prompt}
-                ]
+            client_ai = OpenAI()  # 環境変数 OPENAI_API_KEY を自動で使用
+
+            response = client_ai.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": question}],
+                max_tokens=300,
+                temperature=0.7,
             )
 
-            reply = response["choices"][0]["message"]["content"]
-            await message.channel.send(reply)
+            answer = response.choices[0].message.content
+            await message.channel.send(f"💬 **ChatGPTの回答：**\n{answer}")
 
         except Exception as e:
-            await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+            await message.channel.send(f"⚠️ エラーが発生しました:\n```{e}```")
+        return
 
         # t!ai コマンド（なんちゃってAI返信）
     if message.content.startswith('t!ai'):
