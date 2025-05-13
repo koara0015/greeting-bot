@@ -1,5 +1,6 @@
 # 必要なライブラリをインポート
 import discord       # Discordの機能を使うため
+import openai
 import os            # トークンを環境変数から読み取るため
 import random        # ランダムで返事を選ぶため
 import asyncio       # 時間を待つため（sleep関数など）
