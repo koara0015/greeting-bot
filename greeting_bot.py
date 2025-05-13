@@ -113,6 +113,24 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
+        # t!user コマンド（ユーザー情報を表示）
+    if message.content == 't!user':
+        user = message.author
+        member = message.guild.get_member(user.id)
+
+        embed = discord.Embed(
+            title=f"{user.name} さんのユーザー情報",
+            color=discord.Color.blue()
+        )
+        embed.set_thumbnail(url=user.avatar.url if user.avatar else discord.Embed.Empty)
+        embed.add_field(name="🆔 ユーザーID", value=f"{user.id}", inline=False)
+        embed.add_field(name="📅 アカウント作成日", value=user.created_at.strftime("%Y年%m月%d日 %H:%M:%S"), inline=False)
+        embed.add_field(name="🏠 サーバー参加日", value=member.joined_at.strftime("%Y年%m月%d日 %H:%M:%S") if member and member.joined_at else "不明", inline=False)
+        embed.set_footer(text="✨ Powered by your bot!")
+
+        await message.channel.send(embed=embed)
+        return
+
     # t!yamu コマンド（病み構文を一気に投稿）
     if message.content.startswith('t!yamu'):
         if message.author.id == admin_id:
