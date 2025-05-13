@@ -210,6 +210,25 @@ async def on_message(message):
             await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
         return
 
+        # t!ai コマンド（なんちゃってAI返信）
+    if message.content.startswith('t!ai'):
+        prompt = message.content[5:].strip()
+        if not prompt:
+            await message.channel.send("使い方：t!ai [質問やメッセージ]")
+            return
+
+        responses = [
+            f"それってつまり…{prompt}ってことかな？🤔",
+            f"うーん、{prompt}は難しいけど、考える価値あるね！🧠",
+            f"{prompt}…面白い質問だね！もっと知りたいかも！",
+            f"正直なところ、{prompt}は気分次第かも！？🌈",
+            f"それについては…秘密だよ💬（たぶんね）",
+            f"ちょっと待って、今AI脳フル回転中！💥 {prompt}は…考え中！",
+            f"{prompt}に対する答えは…あなたの心の中にあるよ✨",
+        ]
+
+        await message.channel.send(random.choice(responses))
+
     # "おはよ" を含むメッセージへの返信
     if 'おはよ' in message.content:
         responses = [
