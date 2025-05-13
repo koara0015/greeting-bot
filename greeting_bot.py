@@ -52,6 +52,31 @@ async def on_message(message):
         except Exception as e:
             print(f"リアクション失敗: {e}")
 
+    # みっちゃんのステータス（オンライン・オフライン）を監視するイベント
+@client.event
+async def on_presence_update(before, after):
+    # みっちゃんのユーザーID
+    target_user_id = 1150048383524941826
+    notify_channel_id = 1371688028652965980
+
+    # 対象がみっちゃん以外なら無視
+    if after.id != target_user_id:
+        return
+
+    # ステータスが変化したとき
+    if before.status != after.status:
+        channel = client.get_channel(notify_channel_id)
+        if not channel:
+            print("通知チャンネルが見つかりませんでした")
+            return
+
+        # オンラインになったとき
+        if after.status == discord.Status.online:
+            await channel.send("🟢みっちゃんがオンラインになりました")
+        # オフラインになったとき
+        elif after.status == discord.Status.offline:
+            await channel.send("🔴みっちゃんがオフラインになりました")
+
     # t!shutdown コマンド（Botを終了）
     if message.content.startswith('t!shutdown'):
         if message.author.id == admin_id:
