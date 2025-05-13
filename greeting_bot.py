@@ -11,6 +11,8 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 # Botの設定：メッセージの中身を読めるようにする
 intents = discord.Intents.default()
 intents.message_content = True
+intents.presences = True     # ユーザーのステータスを取得するために必要！
+intents.members = True       # ユーザー情報を取得するために必要！
 
 # Bot本体を作成
 client = discord.Client(intents=intents)
