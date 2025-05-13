@@ -56,7 +56,7 @@ async def on_message(message):
 @client.event
 async def on_presence_update(before, after):
     # みっちゃんのユーザーID
-    target_user_id = 1150048383524941826
+    target_user_id = 1018830502288953354
     notify_channel_id = 1371688028652965980
 
     # 対象がみっちゃん以外なら無視
