@@ -108,20 +108,20 @@ async def on_message(message):
             embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（管理者限定）", inline=False)
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
+            embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（管理者限定）", inline=False)
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
         return
 
-        # t!user コマンド（ユーザー情報を表示・管理者限定）
+    # t!user コマンド（ユーザー情報を表示・管理者限定）
     if message.content.startswith('t!user'):
         if message.author.id == admin_id:
             parts = message.content.split()
-            # デフォルトでは実行者
             target_user = message.author
             target_member = message.guild.get_member(target_user.id)
 
-            # ユーザーIDが指定された場合
+            # 引数が指定されている場合はそのIDのユーザーに変更
             if len(parts) == 2:
                 try:
                     user_id = int(parts[1])
@@ -131,10 +131,12 @@ async def on_message(message):
                     await message.channel.send("⚠️ ユーザーが見つかりませんでした。")
                     return
 
+            # 埋め込みメッセージを作成
             embed = discord.Embed(
                 title=f"🧑‍💼 ユーザー情報：{target_user.name}",
                 color=discord.Color.blue()
             )
+            embed.set_thumbnail(url=target_user.avatar.url if target_user.avatar else target_user.default_avatar.url)  # アイコン追加
             embed.add_field(name="ユーザー名", value=target_user.name, inline=False)
             embed.add_field(name="ユーザーID", value=target_user.id, inline=False)
             embed.add_field(name="アカウント作成日", value=target_user.created_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
@@ -143,6 +145,7 @@ async def on_message(message):
                 value=target_member.joined_at.strftime('%Y-%m-%d %H:%M:%S') if target_member and target_member.joined_at else "不明",
                 inline=False
             )
+
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
