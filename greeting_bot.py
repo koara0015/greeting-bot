@@ -114,6 +114,7 @@ async def on_message(message):
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（管理者限定）", inline=False)
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（管理者限定）", inline=False)
+            embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ 権限がありません")
