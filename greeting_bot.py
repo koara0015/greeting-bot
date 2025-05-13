@@ -219,13 +219,14 @@ async def on_message(message):
             return
 
         responses = [
-            f"それってつまり…{prompt}ってことかな？🤔",
-            f"うーん、{prompt}は難しいけど、考える価値あるね！🧠",
-            f"{prompt}…面白い質問だね！もっと知りたいかも！",
-            f"正直なところ、{prompt}は気分次第かも！？🌈",
-            f"それについては…秘密だよ💬（たぶんね）",
-            f"ちょっと待って、今AI脳フル回転中！💥 {prompt}は…考え中！",
-            f"{prompt}に対する答えは…あなたの心の中にあるよ✨",
+            f"とりあえずDiscordを閉じてから考えたら？",
+            f"口臭いからもう話さない方がいいんじゃない？",
+            f"下ネタやめてください！セクハラですよ！",
+            f"{prompt} ね、僕にはわかるけどお前には教えてやんない",
+            f"すみません、よくわかりませんでした。",
+            f"自分で考えたら？",
+            f"ggrks",
+            f"自分で調べたら？"
         ]
 
         await message.channel.send(random.choice(responses))
