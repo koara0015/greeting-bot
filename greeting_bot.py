@@ -3,10 +3,12 @@ import discord       # Discordの機能を使うため
 import os            # トークンを環境変数から読み取るため
 import random        # ランダムで返事を選ぶため
 import asyncio       # 時間を待つため（sleep関数など）
+import openai  # ChatGPTを使うためのライブラリ
 from datetime import datetime
 
 # トークンを環境変数から取得（セキュリティのため、コードに直接書かない）
 TOKEN = os.getenv("DISCORD_TOKEN")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Botの設定：メッセージの中身を読めるようにする
 intents = discord.Intents.default()
@@ -254,6 +256,36 @@ async def on_message(message):
         if log_channel:
             await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
         return
+
+        # t!chatgpt コマンド（ChatGPTと会話）※誰でも使用可能、特定チャンネル限定
+    if message.content.startswith('t!chatgpt'):
+        allowed_channel_id = 1125349350197964892  # 使用できるチャンネルのID
+
+        # チャンネルが指定されたもの以外なら拒否
+        if message.channel.id != allowed_channel_id:
+            await message.channel.send("⚠️ AIchatのチャンネル外では、このコマンドは機能しません。")
+            return
+
+        prompt = message.content[10:].strip()
+        if not prompt:
+            await message.channel.send("使い方：t!chatgpt [質問やメッセージ]")
+            return
+
+        try:
+            # ChatGPT APIを呼び出して返信を取得
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",  # モデルの指定（gpt-4にしたい場合はここを変更）
+                messages=[
+                    {"role": "system", "content": "あなたは優しくて面白いDiscord Botです。"},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+
+            reply = response["choices"][0]["message"]["content"]
+            await message.channel.send(reply)
+
+        except Exception as e:
+            await message.channel.send(f"⚠️ エラーが発生しました: {e}")
 
         # t!ai コマンド（なんちゃってAI返信）
     if message.content.startswith('t!ai'):
