@@ -44,7 +44,7 @@ async def on_message(message):
     if message.author.bot:
         return  # 他のBotのメッセージは無視する
 
-    admin_id = 1150048383524941826  # 管理者のユーザーID
+    admin_ids = [1150048383524941826, 1095693259403173949] # 管理者ID
     notify_channel_id = 1371322394719031396  # 通知チャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
 
@@ -57,7 +57,7 @@ async def on_message(message):
 
     # t!shutdown コマンド（Botを終了）
     if message.content.startswith('t!shutdown'):
-        if message.author.id == admin_id:
+        if message.author.id in admin_ids:
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send("シャットダウンしました")
@@ -68,7 +68,7 @@ async def on_message(message):
 
     # t!restart コマンド（Botを再起動）
     if message.content.startswith('t!restart'):
-        if message.author.id == admin_id:
+        if message.author.id in admin_ids:
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send("再起動をしました")
@@ -79,7 +79,7 @@ async def on_message(message):
 
     # t!say コマンド（Botが指定チャンネルに発言）
     if message.content.startswith('t!say'):
-        if message.author.id == admin_id:
+        if message.author.id in admin_ids:
             parts = message.content.split(' ', 2)
             if len(parts) < 3:
                 await message.channel.send("使い方：t!say [チャンネルID] [メッセージ]")
@@ -100,7 +100,7 @@ async def on_message(message):
 
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
-        if message.author.id == admin_id:
+        if message.author.id in admin_ids:
             embed = discord.Embed(
                 title="🤖 コマンド一覧",
                 description="このBotで使えるコマンド一覧です！",
@@ -122,7 +122,7 @@ async def on_message(message):
 
     # t!user コマンド（ユーザー情報を表示・管理者限定）
     if message.content.startswith('t!user'):
-        if message.author.id == admin_id:
+        if message.author.id in admin_ids:
             parts = message.content.split()
             target_user = message.author
             target_member = message.guild.get_member(target_user.id)
@@ -161,7 +161,7 @@ async def on_message(message):
     
     # t!yamu コマンド（病み構文を一気に投稿）
     if message.content.startswith('t!yamu'):
-        if message.author.id == admin_id:
+        if message.author.id in admin_ids:
             parts = message.content.split(' ')
             if len(parts) != 2:
                 await message.channel.send("使い方：t!yamu [チャンネルID]")
