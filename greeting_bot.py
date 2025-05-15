@@ -4,6 +4,7 @@ import os            # トークンを環境変数から読み取るため
 import random        # ランダムで返事を選ぶため
 import asyncio       # 時間を待つため（sleep関数など）
 from datetime import datetime
+yamu_cooldowns = {}  # ユーザーIDごとのクールダウン記録
 
 # トークンを環境変数から取得（セキュリティのため、コードに直接書かない）
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -162,9 +163,24 @@ async def on_message(message):
 
 
     
-    # t!yamu コマンド（病み構文を一気に投稿）
+    # t!yamu コマンド（病み構文を一気に投稿・クールダウンあり）
     if message.content.startswith('t!yamu'):
         if message.author.id in admin_ids:
+            # クールダウンチェック
+            now = datetime.now()
+            cooldown_time = 15 * 60  # 15分（秒単位）
+            user_id = message.author.id
+            last_used = omikuji_usage.get(f"yamu_{user_id}")  # yamu専用キー
+
+            if last_used:
+                elapsed = (now - last_used).total_seconds()
+                if elapsed < cooldown_time:
+                    remaining = int(cooldown_time - elapsed)
+                    await message.channel.send(f"⚠️ クールダウン中です。あと {remaining} 秒お待ちください。")
+                    return
+
+            omikuji_usage[f"yamu_{user_id}"] = now  # 使用記録を保存
+
             parts = message.content.split(' ')
             if len(parts) != 2:
                 await message.channel.send("使い方：t!yamu [チャンネルID]")
@@ -214,6 +230,17 @@ async def on_message(message):
                 for line in lines:
                     await target_channel.send(line)
                     await asyncio.sleep(0.1)
+
+                # 投稿完了の通知を管理用チャンネルに送信
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    await log_channel.send(f"病み構文を『{target_channel.name}』に投稿しました")
+
+            except Exception as e:
+                await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+        else:
+            await message.channel.send("⚠️ 権限がありません")
+        return
 
                 # 投稿完了の通知を管理用チャンネルに送信
                 log_channel = client.get_channel(notify_channel_id)
