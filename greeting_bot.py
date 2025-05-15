@@ -310,8 +310,11 @@ async def on_message(message):
 
         await message.channel.send(random.choice(responses))
 
-    # "おはよ" を含むメッセージへの返信
-    if 'おはよ' in message.content:
+# 雑談の自動返信（コマンド以外にだけ反応）
+if not message.content.startswith("t!"):
+    text = message.content.lower()  # 小文字に変換して比較しやすくする
+
+    if "おはよ" in text:
         responses = [
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
             '学校行けよ',
@@ -319,13 +322,10 @@ async def on_message(message):
             '早起き過ぎ！？！？！？！',
             'おっそ',
             'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
-            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
-            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
         ]
         await message.channel.send(random.choice(responses))
 
-    # "おやすみ" を含むメッセージへの返信
-    elif 'おやすみ' in message.content:
+    elif "おやすみ" in text:
         responses = [
             'おやすみ',
             'いい夢見てね！',
@@ -334,7 +334,6 @@ async def on_message(message):
             'おつかれさま、ゆっくり休んでね〜',
             'おやすみ〜',
             'もう起きてこなくていいよ',
-            '進捗達成！「いい夢見てね」'
         ]
         await message.channel.send(random.choice(responses))
 
