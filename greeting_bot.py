@@ -47,6 +47,7 @@ async def on_message(message):
     moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563]  # モデレーターのIDをここに追加
     notify_channel_id = 1371322394719031396  # ログチャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
+    start_time = datetime.now()  # 起動時間を記録
 
     # 特定のチャンネルでメッセージに👍リアクションを付ける
     if message.channel.id == react_channel_id:
@@ -142,6 +143,25 @@ async def on_message(message):
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
+        return
+            
+    # t!stats コマンド（Botの統計情報）
+    if message.content == 't!stats':
+        uptime = datetime.now() - start_time
+        uptime_str = str(uptime).split('.')[0]  # 小数点以下カット
+
+        guild_count = len(client.guilds)
+        user_count = len(set(member.id for guild in client.guilds for member in guild.members))
+
+        embed = discord.Embed(
+            title="📊 Botの統計情報",
+            color=discord.Color.teal()
+        )
+        embed.add_field(name="⏱️ 起動時間", value=uptime_str, inline=False)
+        embed.add_field(name="🧭 サーバー数", value=str(guild_count), inline=True)
+        embed.add_field(name="👥 ユーザー数", value=str(user_count), inline=True)
+
+        await message.channel.send(embed=embed)
         return
 
         # t!chatgpt コマンド（API制限メッセージ）
