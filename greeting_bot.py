@@ -141,7 +141,7 @@ async def on_message(message):
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（モデレーター以上限定）", inline=False)
             embed.add_field(name="🟢 t!stats", value="このボットのステータスを表示します（モデレーター以上限定）", inline=False)
-            embed.add_field(name="🟢 t!mittyan", value="🟢🟢🟢🟢（VIP限定）", inline=False)
+            embed.add_field(name="🟢 t!mittyan", value="❌❌❌❌（VIP限定）", inline=False)
             embed.add_field(name="🟢 t!serverinfo", value="サーバーの詳細を表示します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
@@ -184,6 +184,7 @@ async def on_message(message):
             )
             embed.set_thumbnail(url=guild.icon.url if guild.icon else discord.Embed.Empty)
             embed.add_field(name="サーバー名", value=guild.name, inline=False)
+            embed.add_field(name="サーバーID", value=str(guild.id), inline=False)
             embed.add_field(name="総参加人数", value=f"{total_members}人", inline=True)
             embed.add_field(name="ユーザー数", value=f"{human_count}人", inline=True)
             embed.add_field(name="Bot数", value=f"{bot_count}体", inline=True)
@@ -259,7 +260,13 @@ async def on_message(message):
                 inline=False
             )
 
+            # コマンド実行者に送信
             await message.channel.send(embed=embed)
+
+            # ログチャンネルにも送信
+            log_channel = client.get_channel(notify_channel_id)
+            if log_channel:
+                await log_channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
