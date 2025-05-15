@@ -310,32 +310,31 @@ async def on_message(message):
 
         await message.channel.send(random.choice(responses))
 
-# 雑談の自動返信（コマンド以外にだけ反応）
-if not message.content.startswith("t!"):
-    text = message.content.lower()  # 小文字に変換して比較しやすくする
+    # 雑談の自動返信（コマンドじゃないメッセージだけ）
+    if not message.content.startswith("t!") and message.content.strip():
+        text = message.content.lower()
 
-    if "おはよ" in text:
-        responses = [
-            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
-            '学校行けよ',
-            '寝坊してない？( ˘⁠ω˘ )',
-            '早起き過ぎ！？！？！？！',
-            'おっそ',
-            'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
-        ]
-        await message.channel.send(random.choice(responses))
+        if "おはよ" in text:
+            responses = [
+                'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
+                '学校行けよ',
+                '寝坊してない？( ˘⁠ω˘ )',
+                '早起き過ぎ！？！？！？！',
+                'おっそ',
+            ]
+            await message.channel.send(random.choice(responses))
 
-    elif "おやすみ" in text:
-        responses = [
-            'おやすみ',
-            'いい夢見てね！',
-            '今日もnukeされずに済んだね！',
-            'おやすみのnukeは？',
-            'おつかれさま、ゆっくり休んでね〜',
-            'おやすみ〜',
-            'もう起きてこなくていいよ',
-        ]
-        await message.channel.send(random.choice(responses))
+        elif "おやすみ" in text:
+            responses = [
+                'おやすみ',
+                'いい夢見てね！',
+                '今日もnukeされずに済んだね！',
+                'おやすみのnukeは？',
+                'おつかれさま、ゆっくり休んでね〜',
+                'おやすみ〜',
+                'もう起きてこなくていいよ',
+            ]
+            await message.channel.send(random.choice(responses))
 
     # みっちゃんのステータス（オンライン・オフライン）を監視するイベント
 @client.event
