@@ -117,6 +117,14 @@ async def on_message(message):
                     await log_channel.send(f"⚠️ {message.author.display_name} によるリンク投稿を却下しました：{parts[2]}")
                 return
 
+            # ④ メッセージが200文字を超えていたら却下
+            if len(parts[2]) > 200:
+                await message.channel.send("⚠️ メッセージが長すぎます（200文字以内にしてください）。")
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    await log_channel.send(f"⚠️ {message.author.display_name} のメッセージが長すぎたため却下されました（{len(parts[2])}文字）。")
+                return
+
             try:
                 await target_channel.send(parts[2])
                 await message.channel.send("✅ メッセージを送信しました")
@@ -125,7 +133,7 @@ async def on_message(message):
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
-
+    
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
         if message.author.id in moderator_ids:
