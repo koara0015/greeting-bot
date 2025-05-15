@@ -202,15 +202,13 @@ async def on_message(message):
         return
 
 
-        # t!adminコマンド
-        if message.content == 't!admin':
+    # t!admin コマンド（権限一覧を表示）
+    if message.content == 't!admin':
         if message.author.id in moderator_ids:
-            # 表示用ユーザー取得関数
             def format_user(user_id):
                 user = message.guild.get_member(user_id)
                 return f"{user.mention}（{user.name}）" if user else f"不明（{user_id}）"
 
-            # オーナー、管理者、モデレーター、VIP の表示整備
             owner_display = format_user(owner_id)
             admin_display = [format_user(uid) for uid in admin_ids if uid != owner_id]
             moderator_display = [
