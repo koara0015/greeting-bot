@@ -41,8 +41,9 @@ async def on_message(message):
     if message.author.bot:
         return  # 他のBotのメッセージは無視する
 
+    owner_id = 1150048383524941826  # ボットのオーナー（完全権限）
     admin_ids = [1150048383524941826, 1095693259403173949] # 管理者ID
-    notify_channel_id = 1371322394719031396  # 通知チャンネルのID
+    notify_channel_id = 1371322394719031396  # ログチャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
 
     # 特定のチャンネルでメッセージに👍リアクションを付ける
@@ -54,7 +55,7 @@ async def on_message(message):
 
     # t!shutdown コマンド（Botを終了）
     if message.content.startswith('t!shutdown'):
-        if message.author.id in admin_ids:
+        if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send("シャットダウンしました")
@@ -65,7 +66,7 @@ async def on_message(message):
 
     # t!restart コマンド（Botを再起動）
     if message.content.startswith('t!restart'):
-        if message.author.id in admin_ids:
+        if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send("再起動をしました")
