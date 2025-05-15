@@ -76,29 +76,31 @@ async def on_message(message):
         else:
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
-
-        # t!say コマンド（Botが指定チャンネルに発言）
+        
+    # t!say コマンド（Botが指定チャンネルに発言・リンクブロック＆メンション対応）
         if message.content.startswith('t!say'):
             if message.author.id in admin_ids:
                 parts = message.content.split(' ', 2)
                 if len(parts) < 3:
-                    await message.channel.send("使い方：t!say [チャンネルIDまたは#チャンネル] [メッセージ]")
+                    await message.channel.send("使い方：t!say [チャンネルID または #チャンネル] [メッセージ]")
                     return
 
                 raw_channel = parts[1]
                 say_message = parts[2]
 
-                # リンク含むメッセージをブロック
+                # リンクチェック
                 blocked_keywords = ["http://", "https://", "www.", "discord.gg"]
                 if any(keyword in say_message for keyword in blocked_keywords):
                     await message.channel.send("⚠️ リンクが含まれているため却下しました。")
                     log_channel = client.get_channel(notify_channel_id)
                     if log_channel:
-                        await log_channel.send(f"⚠️ {message.author.display_name} が送信しようとしたメッセージにリンクが含まれていたため却下します。\n内容: {say_message}")
+                        await log_channel.send(
+                            f"⚠️ {message.author.display_name} が送信しようとしたメッセージにリンクが含まれていたため却下します。\n内容: {say_message}"
+                        )
                     return
 
                 try:
-                    # メンション形式ならIDを取り出す（例：<#1234567890> → 1234567890）
+                    # メンション形式のチャンネル指定に対応
                     if raw_channel.startswith("<#") and raw_channel.endswith(">"):
                         channel_id = int(raw_channel[2:-1])
                     else:
