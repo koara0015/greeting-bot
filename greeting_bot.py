@@ -162,27 +162,24 @@ async def on_message(message):
         return
 
 
-    
-    # t!yamu コマンド（病み構文を一気に投稿・クールダウンあり）
-    if message.content.startswith('t!yamu'):
-        if message.author.id in admin_ids:
-            # クールダウンチェック
-            now = datetime.now()
-            cooldown_time = 15 * 60  # 15分
-            user_id = message.author.id
-            last_used = omikuji_usage.get(f"yamu_{user_id}")  # ←ここまでOK
+# t!yamuコマンド    
+if message.content.startswith('t!yamu'):
+    if message.author.id in admin_ids:
+        # クールダウンチェック
+        now = datetime.now()
+        cooldown_time = 15 * 60  # 15分（秒）
+        user_id = message.author.id
+        last_used = omikuji_usage.get(f"yamu_{user_id}")
 
-            if last_used:  # ←★ここが問題の行（インデントを合わせる）
-                elapsed = (now - last_used).total_seconds()
-                if elapsed < cooldown_time:
-                    minutes = int((cooldown_time - elapsed) // 60)
-                    seconds = int((cooldown_time - elapsed) % 60)
-                    await message.channel.send(f"⚠️ クールダウン中です。あと {minutes} 分 {seconds} 秒お待ちください。")
-                    return
+        if last_used:
+            elapsed = (now - last_used).total_seconds()
+            if elapsed < cooldown_time:
+                minutes = int((cooldown_time - elapsed) // 60)
+                seconds = int((cooldown_time - elapsed) % 60)
+                await message.channel.send(f"⚠️ クールダウン中です。あと {minutes} 分 {seconds} 秒お待ちください。")
+                return
 
-            omikuji_usage[f"yamu_{user_id}"] = now  # 使用記録を保存
-
-            # 以下省略（投稿処理へ）
+        omikuji_usage[f"yamu_{user_id}"] = now
 
         parts = message.content.split(' ')
         if len(parts) != 2:
@@ -195,7 +192,6 @@ async def on_message(message):
                 await message.channel.send("⚠️ チャンネルが見つかりませんでした")
                 return
 
-            # 投稿する文章リスト
             lines = [
                 "こっちは楽しくディスコードやろうとしてるのに全部それが裏目に出て",
                 "嫌がられたり嫌われたりして",
@@ -229,12 +225,10 @@ async def on_message(message):
                 "僕はもうどうしていいのかわからない"
             ]
 
-            # 一行ずつ送信（0.1秒ごと）
             for line in lines:
                 await target_channel.send(line)
                 await asyncio.sleep(0.1)
 
-            # 投稿完了の通知を管理用チャンネルに送信
             log_channel = client.get_channel(notify_channel_id)
             if log_channel:
                 await log_channel.send(f"病み構文を『{target_channel.name}』に投稿しました")
