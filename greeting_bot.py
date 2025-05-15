@@ -141,6 +141,8 @@ async def on_message(message):
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（モデレーター以上限定）", inline=False)
             embed.add_field(name="🟢 t!stats", value="このボットのステータスを表示します（モデレーター以上限定）", inline=False)
+            embed.add_field(name="🟢 t!mittyan", value="🟢🟢🟢🟢（VIP限定）", inline=False)
+            embed.add_field(name="🟢 t!serverinfo", value="サーバーの詳細を表示します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
@@ -161,6 +163,41 @@ async def on_message(message):
                 await log_channel.send(f"{message.author.display_name} が t!mittyan を使用しようとしました。")
         else:
             await message.channel.send("🛑 オーナーとVIP専用コマンドです。")
+        return
+
+        # t!serverinfo コマンド（サーバー情報を表示・モデレーター限定）
+    if message.content == 't!serverinfo':
+        if message.author.id in moderator_ids:
+            guild = message.guild
+            owner_user = guild.owner
+            total_members = guild.member_count
+            bot_count = len([member for member in guild.members if member.bot])
+            human_count = total_members - bot_count
+            created_at = guild.created_at.strftime('%Y-%m-%d %H:%M:%S')
+            bot_joined_at = guild.me.joined_at.strftime('%Y-%m-%d %H:%M:%S')
+            bot_owner_id = 1150048383524941826
+            is_owner_in_server = guild.get_member(bot_owner_id) is not None
+
+            embed = discord.Embed(
+                title=f"📊 サーバー情報：{guild.name}",
+                color=discord.Color.teal()
+            )
+            embed.set_thumbnail(url=guild.icon.url if guild.icon else discord.Embed.Empty)
+            embed.add_field(name="サーバー名", value=guild.name, inline=False)
+            embed.add_field(name="総参加人数", value=f"{total_members}人", inline=True)
+            embed.add_field(name="ユーザー数", value=f"{human_count}人", inline=True)
+            embed.add_field(name="Bot数", value=f"{bot_count}体", inline=True)
+            embed.add_field(name="サーバー作成日", value=created_at, inline=False)
+            embed.add_field(name="サーバーオーナー", value=owner_user.name, inline=False)
+            embed.add_field(name="みっちゃんBot導入日", value=bot_joined_at, inline=False)
+            embed.add_field(name="オーナー参加中？", value="✅ はい" if is_owner_in_server else "❌ いいえ", inline=False)
+
+            await message.channel.send(embed=embed)
+            log_channel = client.get_channel(notify_channel_id)
+            if log_channel:
+                await log_channel.send(embed=embed)
+        else:
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
         # t!stats コマンド（Botのステータス表示・モデレーター以上限定）
