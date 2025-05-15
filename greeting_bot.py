@@ -117,6 +117,11 @@ async def on_message(message):
             await message.channel.send("⚠️ 権限がありません")
         return
 
+        # t!chatgpt コマンド（API制限メッセージ）
+    if message.content.startswith("t!chatgpt"):
+        await message.channel.send("🔴 API制限に達したため利用不可です。")
+        return
+
     # t!user コマンド（ユーザー情報を表示・管理者限定）
     if message.content.startswith('t!user'):
         if message.author.id in admin_ids:
@@ -255,11 +260,6 @@ async def on_message(message):
         if log_channel:
             await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
         return
-
-        # t!chatgpt コマンド（現在使用不可）
-if message.content.startswith("t!chatgpt"):
-    await message.channel.send("🔴 API制限に達したため利用不可です。")
-    return
 
         # t!ai コマンド（なんちゃってAI返信）
     if message.content.startswith('t!ai'):
