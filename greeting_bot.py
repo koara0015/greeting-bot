@@ -163,25 +163,26 @@ async def on_message(message):
 
 
     
-# t!yamu コマンド（病み構文を一気に投稿・クールダウンあり）
-if message.content.startswith('t!yamu'):
-    if message.author.id in admin_ids:
-        # クールダウンチェック
-        now = datetime.now()
-        cooldown_time = 15 * 60  # 15分（秒単位）
-        user_id = message.author.id
-        last_used = omikuji_usage.get(f"yamu_{user_id}")  # yamu専用キー
+    # t!yamu コマンド（病み構文を一気に投稿・クールダウンあり）
+    if message.content.startswith('t!yamu'):
+        if message.author.id in admin_ids:
+            # クールダウンチェック
+            now = datetime.now()
+            cooldown_time = 15 * 60  # 15分
+            user_id = message.author.id
+            last_used = omikuji_usage.get(f"yamu_{user_id}")  # ←ここまでOK
 
-            if last_used:
+            if last_used:  # ←★ここが問題の行（インデントを合わせる）
                 elapsed = (now - last_used).total_seconds()
                 if elapsed < cooldown_time:
-                    remaining = int(cooldown_time - elapsed)
-                    minutes = remaining // 60
-                    seconds = remaining % 60
+                    minutes = int((cooldown_time - elapsed) // 60)
+                    seconds = int((cooldown_time - elapsed) % 60)
                     await message.channel.send(f"⚠️ クールダウン中です。あと {minutes} 分 {seconds} 秒お待ちください。")
                     return
 
-        omikuji_usage[f"yamu_{user_id}"] = now  # 使用記録を保存
+            omikuji_usage[f"yamu_{user_id}"] = now  # 使用記録を保存
+
+            # 以下省略（投稿処理へ）
 
         parts = message.content.split(' ')
         if len(parts) != 2:
