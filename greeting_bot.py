@@ -139,34 +139,37 @@ async def on_message(message):
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（モデレーター以上限定）", inline=False)
+            embed.add_field(name="🟢 t!stats", value="このボットのステータスを表示します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
             
-    # t!stats コマンド（Botの統計情報）
-    if message.content == 't!stats':
-        uptime = datetime.now() - start_time
-        uptime_str = str(uptime).split('.')[0]  # 小数点以下カット
-
-        guild_count = len(client.guilds)
-        user_count = len(set(member.id for guild in client.guilds for member in guild.members))
-
-        embed = discord.Embed(
-            title="📊 Botの統計情報",
-            color=discord.Color.teal()
-        )
-        embed.add_field(name="⏱️ 起動時間", value=uptime_str, inline=False)
-        embed.add_field(name="🧭 サーバー数", value=str(guild_count), inline=True)
-        embed.add_field(name="👥 ユーザー数", value=str(user_count), inline=True)
-
-        await message.channel.send(embed=embed)
-        return
-
         # t!chatgpt コマンド（API制限メッセージ）
     if message.content.startswith("t!chatgpt"):
         await message.channel.send("🔴 API制限に達したため利用不可です。")
+        return
+
+        # t!stats コマンド（Botのステータス表示・モデレーター以上限定）
+    if message.content == 't!stats':
+        if message.author.id in moderator_ids:
+            now = datetime.now()
+            uptime = now - start_time
+            hours, remainder = divmod(int(uptime.total_seconds()), 3600)
+            minutes, seconds = divmod(remainder, 60)
+
+            embed = discord.Embed(
+                title="📊 Botのステータス",
+                color=discord.Color.purple()
+            )
+            embed.add_field(name="起動時間", value=f"{hours}時間 {minutes}分 {seconds}秒", inline=False)
+            embed.add_field(name="コマンド数", value="現在対応しているコマンド数: 約10個", inline=False)
+            embed.add_field(name="ユーザー数", value=f"{len(message.guild.members)}人", inline=False)
+
+            await message.channel.send(embed=embed)
+        else:
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
     # t!user コマンド（ユーザー情報を表示・管理者限定）
