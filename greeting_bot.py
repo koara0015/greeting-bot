@@ -271,7 +271,6 @@ async def on_message(message):
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
-    # t!omikuji コマンド（おみくじ）
     if message.content == 't!omikuji':
         today = datetime.now().date()
         user_id = message.author.id
@@ -292,11 +291,13 @@ async def on_message(message):
             "中吉":   ["なかなかいい感じの運勢！", "落ち着いて行動すれば吉", "流れに乗れ！"],
             "吉":     ["いいことありそう！", "ラッキーアイテムはチョコ", "ちょっと自信を持ってみよう！"],
             "大吉":   ["最高の一日になる！", "思い切って行動してみよう！", "やるなら今！"],
-            "たまご":   ["今日はたまごの言うことを聞いといたらうまくいく！", "今日は過去最高潮に運がいい！", "何でも挑戦すれば全ていい方向に行く！"]
-
+            "たまご": ["今日はたまごの言うことを聞いといたらうまくいく！", "今日は過去最高潮に運がいい！", "何でも挑戦すれば全ていい方向に行く！"]
         }
 
-        result = random.choice(list(fortunes.keys()))
+        choices = ["吉", "小吉", "末吉", "中吉", "凶", "大吉", "大凶", "特大凶", "たまご"]
+        weights = [18, 19, 19, 19, 15, 4, 4, 2, 1]  # 合計 = 101
+
+        result = random.choices(choices, weights=weights, k=1)[0]
         comment = random.choice(fortunes[result])
 
         await message.channel.send(f"🎴 おみくじの結果：**{result}**！\n{comment}")
