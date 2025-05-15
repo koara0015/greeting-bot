@@ -77,46 +77,50 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
         
-    # t!say コマンド（Botが指定チャンネルに発言・リンクブロック＆メンション対応）
-        if message.content.startswith('t!say'):
-            if message.author.id in admin_ids:
-                parts = message.content.split(' ', 2)
-                if len(parts) < 3:
-                    await message.channel.send("使い方：t!say [チャンネルID または #チャンネル] [メッセージ]")
-                    return
+    # t!say コマンド（Botが指定チャンネルに発言）
+    if message.content.startswith('t!say'):
+        if message.author.id in admin_ids:
+            parts = message.content.split(' ', 2)
+            if len(parts) < 3:
+                await message.channel.send("使い方：t!say [チャンネルID or #チャンネル] [メッセージ]")
+                return
 
-                raw_channel = parts[1]
-                say_message = parts[2]
+            # メッセージと送信先チャンネルの取得
+            target_channel = None
 
-                # リンクチェック
-                blocked_keywords = ["http://", "https://", "www.", "discord.gg"]
-                if any(keyword in say_message for keyword in blocked_keywords):
-                    await message.channel.send("⚠️ リンクが含まれているため却下しました。")
-                    log_channel = client.get_channel(notify_channel_id)
-                    if log_channel:
-                        await log_channel.send(
-                            f"⚠️ {message.author.display_name} が送信しようとしたメッセージにリンクが含まれていたため却下します。\n内容: {say_message}"
-                        )
-                    return
+            # ① チャンネルメンションの場合
+            if message.channel_mentions:
+                target_channel = message.channel_mentions[0]
 
-                try:
-                    # メンション形式のチャンネル指定に対応
-                    if raw_channel.startswith("<#") and raw_channel.endswith(">"):
-                        channel_id = int(raw_channel[2:-1])
-                    else:
-                        channel_id = int(raw_channel)
-
-                    target = client.get_channel(channel_id)
-                    if target:
-                        await target.send(say_message)
-                        await message.channel.send("✅ メッセージを送信しました")
-                    else:
-                        await message.channel.send("⚠️ チャンネルが見つかりませんでした")
-                except Exception as e:
-                    await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+            # ② 数字でチャンネルIDを指定した場合
             else:
-                await message.channel.send("⚠️ 権限がありません")
-            return
+                try:
+                    channel_id = int(parts[1])
+                    target_channel = client.get_channel(channel_id)
+                except:
+                    await message.channel.send("⚠️ チャンネルIDの形式が正しくありません。")
+                    return
+
+            if not target_channel:
+                await message.channel.send("⚠️ チャンネルが見つかりませんでした")
+                return
+
+            # ③ リンクが含まれていたら却下
+            if "http://" in parts[2] or "https://" in parts[2] or "www." in parts[2] or "discord.gg" in parts[2]:
+                await message.channel.send("⚠️ リンクが含まれているため却下しました。")
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    await log_channel.send(f"⚠️ {message.author.display_name} によるリンク投稿を却下しました：{parts[2]}")
+                return
+
+            try:
+                await target_channel.send(parts[2])
+                await message.channel.send("✅ メッセージを送信しました")
+            except Exception as e:
+                await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+        else:
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
+        return
 
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
