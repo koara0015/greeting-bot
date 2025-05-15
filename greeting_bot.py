@@ -172,14 +172,14 @@ if message.content.startswith('t!yamu'):
         user_id = message.author.id
         last_used = omikuji_usage.get(f"yamu_{user_id}")  # yamu専用キー
 
-        if last_used:
-            elapsed = (now - last_used).total_seconds()
-            if elapsed < cooldown_time:
-                remaining = int(cooldown_time - elapsed)
-                minutes = remaining // 60
-                seconds = remaining % 60
-                await message.channel.send(f"⚠️ クールダウン中です。あと {minutes} 分 {seconds} 秒お待ちください。")
-                return
+            if last_used:
+                elapsed = (now - last_used).total_seconds()
+                if elapsed < cooldown_time:
+                    remaining = int(cooldown_time - elapsed)
+                    minutes = remaining // 60
+                    seconds = remaining % 60
+                    await message.channel.send(f"⚠️ クールダウン中です。あと {minutes} 分 {seconds} 秒お待ちください。")
+                    return
 
         omikuji_usage[f"yamu_{user_id}"] = now  # 使用記録を保存
 
