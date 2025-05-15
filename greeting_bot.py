@@ -1,15 +1,12 @@
 # 必要なライブラリをインポート
 import discord       # Discordの機能を使うため
-import openai
 import os            # トークンを環境変数から読み取るため
 import random        # ランダムで返事を選ぶため
 import asyncio       # 時間を待つため（sleep関数など）
-from openai import OpenAI # aichatを使うため
 from datetime import datetime
 
 # トークンを環境変数から取得（セキュリティのため、コードに直接書かない）
 TOKEN = os.getenv("DISCORD_TOKEN")
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Botの設定：メッセージの中身を読めるようにする
 intents = discord.Intents.default()
@@ -259,34 +256,10 @@ async def on_message(message):
             await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
         return
 
-    # t!chatgpt コマンド（ChatGPTに質問する）
-    if message.content.startswith("t!chatgpt"):
-        allowed_channel_id = 1125349350197964892  # ChatGPT専用チャンネルのID
-        if message.channel.id != allowed_channel_id:
-            await message.channel.send("⚠️ AIchatのチャンネル外では、このコマンドは機能しません。")
-            return
-
-        question = message.content[10:].strip()
-        if not question:
-            await message.channel.send("使い方：t!chatgpt [質問内容]")
-            return
-
-        try:
-            client_ai = OpenAI()  # 環境変数 OPENAI_API_KEY を自動で使用
-
-            response = client_ai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": question}],
-                max_tokens=300,
-                temperature=0.7,
-            )
-
-            answer = response.choices[0].message.content
-            await message.channel.send(f"💬 **ChatGPTの回答：**\n{answer}")
-
-        except Exception as e:
-            await message.channel.send(f"⚠️ エラーが発生しました:\n```{e}```")
-        return
+        # t!chatgpt コマンド（現在使用不可）
+if message.content.startswith("t!chatgpt"):
+    await message.channel.send("🔴 API制限に達したため利用不可です。")
+    return
 
         # t!ai コマンド（なんちゃってAI返信）
     if message.content.startswith('t!ai'):
