@@ -131,10 +131,16 @@ async def on_message(message):
             target_user = message.author
             target_member = message.guild.get_member(target_user.id)
 
-            # 引数が指定されている場合はそのIDのユーザーに変更
+            # 引数が指定されている場合（ID または メンション対応）
             if len(parts) == 2:
+                arg = parts[1]
+
+                # メンション形式（<@1234567890> または <@!1234567890>）をIDに変換
+                if arg.startswith("<@") and arg.endswith(">"):
+                    arg = arg.replace("<@", "").replace("!", "").replace(">", "")
+
                 try:
-                    user_id = int(parts[1])
+                    user_id = int(arg)
                     target_user = await client.fetch_user(user_id)
                     target_member = message.guild.get_member(user_id)
                 except:
@@ -146,7 +152,7 @@ async def on_message(message):
                 title=f"🧑‍💼 ユーザー情報：{target_user.name}",
                 color=discord.Color.blue()
             )
-            embed.set_thumbnail(url=target_user.avatar.url if target_user.avatar else target_user.default_avatar.url)  # アイコン追加
+            embed.set_thumbnail(url=target_user.avatar.url if target_user.avatar else target_user.default_avatar.url)
             embed.add_field(name="ユーザー名", value=target_user.name, inline=False)
             embed.add_field(name="ユーザーID", value=target_user.id, inline=False)
             embed.add_field(name="アカウント作成日", value=target_user.created_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
