@@ -45,6 +45,7 @@ async def on_message(message):
     owner_id = 1150048383524941826  # ボットのオーナー（完全権限）
     admin_ids = [1150048383524941826, 1095693259403173949] # 管理者ID
     moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563]  # モデレーターのIDをここに追加
+    vip_ids = [1150048383524941826]  # ←VIPユーザーのIDを追加
     notify_channel_id = 1371322394719031396  # ログチャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
     start_time = datetime.now()  # 起動時間を記録
@@ -149,6 +150,17 @@ async def on_message(message):
         # t!chatgpt コマンド（API制限メッセージ）
     if message.content.startswith("t!chatgpt"):
         await message.channel.send("🔴 API制限に達したため利用不可です。")
+        return
+
+        # t!mittyan コマンド（オーナー専用）
+    if message.content == 't!mittyan':
+        if message.author.id == owner_id:
+            await message.channel.send("このサーバーでnukeはご利用いただけません")
+            log_channel = client.get_channel(notify_channel_id)
+            if log_channel:
+                await log_channel.send(f"{message.author.display_name} が t!mittyan を使用しようとしました。")
+        else:
+            await message.channel.send("🛑 オーナーとVIP専用コマンドです。")
         return
 
         # t!stats コマンド（Botのステータス表示・モデレーター以上限定）
