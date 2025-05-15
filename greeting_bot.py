@@ -106,7 +106,7 @@ async def on_message(message):
             except Exception as e:
                 await message.channel.send(f"⚠️ エラーが発生しました: {e}")
         else:
-            await message.channel.send("⚠️ 権限がありません")
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
     # t!help コマンド（コマンド一覧を表示）
@@ -128,7 +128,7 @@ async def on_message(message):
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
-            await message.channel.send("⚠️ 権限がありません")
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
         # t!chatgpt コマンド（API制限メッセージ）
@@ -176,7 +176,7 @@ async def on_message(message):
 
             await message.channel.send(embed=embed)
         else:
-            await message.channel.send("⚠️ 権限がありません")
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
 
@@ -255,7 +255,7 @@ async def on_message(message):
             except Exception as e:
                 await message.channel.send(f"⚠️ エラーが発生しました: {e}")
         else:
-            await message.channel.send("⚠️ 権限がありません")
+            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
     # t!omikuji コマンド（おみくじ）
