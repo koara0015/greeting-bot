@@ -79,7 +79,7 @@ async def on_message(message):
 
     # t!say コマンド（Botが指定チャンネルに発言）
     if message.content.startswith('t!say'):
-        if message.author.id in admin_ids:
+        if message.author.id in moderator_ids:
             parts = message.content.split(' ', 2)
             if len(parts) < 3:
                 await message.channel.send("使い方：t!say [チャンネルID] [メッセージ]")
@@ -111,20 +111,20 @@ async def on_message(message):
 
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
-        if message.author.id in admin_ids:
+        if message.author.id in moderator_ids:
             embed = discord.Embed(
                 title="🤖 コマンド一覧",
                 description="このBotで使えるコマンド一覧です！",
                 color=discord.Color.green()
             )
-            embed.add_field(name="🟢 t!help", value="コマンド一覧を表示します（管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!shutdown", value="Botを終了します（管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!restart", value="Botを再起動します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!help", value="コマンド一覧を表示します（モデレーター以上限定）", inline=False)
+            embed.add_field(name="🟢 t!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（モデレーター以上限定）", inline=False)
+            embed.add_field(name="🟢 t!shutdown", value="Botを終了します（オーナー限定）", inline=False)
+            embed.add_field(name="🟢 t!restart", value="Botを再起動します（オーナー限定）", inline=False)
             embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（モデレーター以上限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
@@ -138,7 +138,7 @@ async def on_message(message):
 
     # t!user コマンド（ユーザー情報を表示・管理者限定）
     if message.content.startswith('t!user'):
-        if message.author.id in admin_ids:
+        if message.author.id in moderator_ids:
             parts = message.content.split()
             target_user = message.author
             target_member = message.guild.get_member(target_user.id)
@@ -182,7 +182,7 @@ async def on_message(message):
 
     # t!yamu コマンド（病み構文を一気に投稿・クールダウンあり）
     if message.content.startswith('t!yamu'):
-        if message.author.id in admin_ids:
+        if message.author.id in moderator_ids:
             # クールダウンチェック
             now = datetime.now()
             cooldown_time = 15 * 60  # 15分（秒）
