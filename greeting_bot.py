@@ -18,6 +18,9 @@ intents.members = True       # ユーザー情報を取得するために必要�
 # Bot本体を作成
 client = discord.Client(intents=intents)
 
+# ✅ 起動時に一度だけ記録される
+start_time = datetime.now()
+
 # おみくじの使用履歴（ユーザーID: 最後の使用日）
 omikuji_usage = {}
 
@@ -48,7 +51,6 @@ async def on_message(message):
     vip_ids = [1150048383524941826]  # ←VIPユーザーのIDを追加
     notify_channel_id = 1371322394719031396  # ログチャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
-    start_time = datetime.now()  # 起動時間を記録
 
     # 特定のチャンネルでメッセージに👍リアクションを付ける
     if message.channel.id == react_channel_id:
