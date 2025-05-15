@@ -79,7 +79,7 @@ async def on_message(message):
         
     # t!say コマンド（Botが指定チャンネルに発言）
     if message.content.startswith('t!say'):
-        if message.author.id in admin_ids:
+        if message.author.id in moderator_ids:
             parts = message.content.split(' ', 2)
             if len(parts) < 3:
                 await message.channel.send("使い方：t!say [チャンネルID or #チャンネル] [メッセージ]")
