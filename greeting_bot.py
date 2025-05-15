@@ -63,7 +63,7 @@ async def on_message(message):
                 await channel.send("シャットダウンしました")
             await client.close()
         else:
-            await message.channel.send("⚠️ 権限がありません")
+            await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
     # t!restart コマンド（Botを再起動）
@@ -74,7 +74,7 @@ async def on_message(message):
                 await channel.send("再起動をしました")
             await client.close()
         else:
-            await message.channel.send("⚠️ 権限がありません")
+            await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
     # t!say コマンド（Botが指定チャンネルに発言）
@@ -84,11 +84,22 @@ async def on_message(message):
             if len(parts) < 3:
                 await message.channel.send("使い方：t!say [チャンネルID] [メッセージ]")
                 return
+
+            say_message = parts[2]
+            # 禁止文字列のチェック
+            blocked_keywords = ["http://", "https://", "www.", "discord.gg"]
+            if any(keyword in say_message for keyword in blocked_keywords):
+                await message.channel.send("⚠️ リンクが含まれているため却下しました。")
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    await log_channel.send(f"⚠️ {message.author.display_name} が送信しようとしたメッセージにリンクが含まれていたため却下します。\n内容: {say_message}")
+                return
+
             try:
                 channel_id = int(parts[1])
                 target = client.get_channel(channel_id)
                 if target:
-                    await target.send(parts[2])
+                    await target.send(say_message)
                     await message.channel.send("✅ メッセージを送信しました")
                 else:
                     await message.channel.send("⚠️ チャンネルが見つかりませんでした")
