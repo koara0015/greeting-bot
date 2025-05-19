@@ -187,7 +187,7 @@ async def on_message(message):
         return
 
     # t!dmu コマンド（管理者限定：埋め込み付きDM送信）
-if message.content.startswith('t!dmu'):
+    if message.content.startswith('t!dmu'):
     if message.author.id in admin_ids:
         parts = message.content.split(' ', 4)
         if len(parts) < 5:
