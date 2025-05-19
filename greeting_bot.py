@@ -83,7 +83,7 @@ async def on_message(message):
         
     # t!say コマンド（Botが指定チャンネルに発言）
     if message.content.startswith('t!say'):
-        if message.author.id in moderator_ids:
+        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             parts = message.content.split(' ', 2)
             if len(parts) < 3:
                 await message.channel.send("使い方：t!say [チャンネルID or #チャンネル] [メッセージ]")
@@ -143,7 +143,7 @@ async def on_message(message):
     
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
-        if message.author.id in moderator_ids:
+        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             embed = discord.Embed(
                 title="🤖 コマンド一覧",
                 description="このBotで使えるコマンド一覧です！",
@@ -184,7 +184,7 @@ async def on_message(message):
 
         # t!serverinfo コマンド（サーバー情報を表示・モデレーター限定）
     if message.content == 't!serverinfo':
-        if message.author.id in moderator_ids:
+        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             guild = message.guild
             owner_user = guild.owner
             total_members = guild.member_count
@@ -221,7 +221,7 @@ async def on_message(message):
 
     # t!admin コマンド（権限一覧を表示）
     if message.content == 't!admin':
-        if message.author.id in moderator_ids:
+        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             def format_user(user_id):
                 user = message.guild.get_member(user_id)
                 return f"{user.mention}（{user.name}）" if user else f"不明（{user_id}）"
@@ -252,7 +252,7 @@ async def on_message(message):
 
         # t!stats コマンド（Botのステータス表示・モデレーター以上限定）
     if message.content == 't!stats':
-        if message.author.id in moderator_ids:
+        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             now = datetime.now()
             uptime = now - start_time
             hours, remainder = divmod(int(uptime.total_seconds()), 3600)
@@ -273,7 +273,7 @@ async def on_message(message):
 
     # t!user コマンド（ユーザー情報を表示・管理者限定）
     if message.content.startswith('t!user'):
-        if message.author.id in moderator_ids:
+        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             parts = message.content.split()
             target_user = message.author
             target_member = message.guild.get_member(target_user.id)
@@ -455,12 +455,19 @@ async def on_message(message):
             f"お母さんにでも聞いたら？",
             f"そもそも誰お前。",
             f"何でそんなに滑舌悪いのに早口で喋ってるの？",
-            f"そういう質問はボットに聞くべきじゃないと思う",
+            f"そういうのはボットに聞くべきじゃないと思う",
             f"下ネタやめてください。",
             f"AIと話してて人生楽しいの？",
             f"まずはDiscordを開きたまごのお部屋というサーバーを開く。その後メンバー達が助けてくれて解決する。",
             f"死ね。",
-            f"もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ"
+            f"もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ",
+            f"（急に話しかけてきたけど誰だこいつ）"
+            f"そういうことはたまごに言おうね"
+            f"そういうことは管理者に言おうね"
+            f"そういうことは友達に言おうね"
+            f"ボットに話しかけるってことは友達いないの？"
+            f"普通に臭いから話しかけないで。"
+            f"お前風呂キャンセル界隈か？インターネット越しに臭うぞ"
         ]
 
         await message.channel.send(random.choice(responses))
