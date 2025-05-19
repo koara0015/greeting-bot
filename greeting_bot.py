@@ -47,7 +47,7 @@ async def on_message(message):
 
     owner_id = 1150048383524941826  # ボットのオーナー（完全権限）
     admin_ids = [1150048383524941826, 1095693259403173949] # 管理者ID
-    moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563, 841603812548411412]  # モデレーターのIDをここに追加
+    moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563, 841603812548411412, 1138810816905367633]  # モデレーターのIDをここに追加
     vip_ids = [1150048383524941826]  # ←VIPユーザーのIDを追加
     notify_channel_id = 1371322394719031396  # ログチャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
@@ -95,12 +95,19 @@ async def on_message(message):
             # ① チャンネルメンションの場合
             if message.channel_mentions:
                 target_channel = message.channel_mentions[0]
+                # オーナー以外が他サーバーを指定していたら却下
+                if message.author.id != owner_id and target_channel.guild.id != message.guild.id:
+                    await message.channel.send("⚠️ 他のサーバーのチャンネルには送信できません。")
+                    return
 
             # ② 数字でチャンネルIDを指定した場合
             else:
                 try:
                     channel_id = int(parts[1])
                     target_channel = client.get_channel(channel_id)
+                    if message.author.id != owner_id and target_channel and target_channel.guild.id != message.guild.id:
+                        await message.channel.send("⚠️ 他のサーバーのチャンネルには送信できません。")
+                        return
                 except:
                     await message.channel.send("⚠️ チャンネルIDの形式が正しくありません。")
                     return
