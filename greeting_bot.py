@@ -186,10 +186,9 @@ async def on_message(message):
             await message.channel.send("🛑 管理者専用コマンドです。")
         return
 
-    # t!dmu コマンド（管理者限定：埋め込み付きDM送信）
-
+    # t!dmuコマンド
     if message.content.startswith('t!dmu'):
-        if message.author.id in admin_ids:
+    if message.author.id in admin_ids:
         parts = message.content.split(' ', 4)
         if len(parts) < 5:
             await message.channel.send("使い方：t!dmu [ユーザーIDまたはメンション] [題名] [内容] [画像・動画URL（none可）]")
@@ -197,7 +196,6 @@ async def on_message(message):
         try:
             user_arg = parts[1]
 
-            # メンション形式ならIDに変換
             if user_arg.startswith("<@") and user_arg.endswith(">"):
                 user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
 
@@ -208,17 +206,13 @@ async def on_message(message):
             content = parts[3]
             media_url = parts[4]
 
-            # ✅ 埋め込みを作成
             embed = discord.Embed(title=title, description=content, color=discord.Color.blue())
             if media_url.lower() != "none":
                 embed.set_image(url=media_url)
 
-            # ✅ DMを送信（埋め込み形式で）
             await dm_user.send(embed=embed)
-
             await message.channel.send(f"✅ ユーザー {dm_user.name} に埋め込みDMを送信しました。")
 
-            # ✅ ログにも送信
             log_channel = client.get_channel(notify_channel_id)
             if log_channel:
                 log_embed = discord.Embed(title="📩 埋め込みDM送信ログ", color=discord.Color.dark_blue())
@@ -228,7 +222,6 @@ async def on_message(message):
                 log_embed.add_field(name="内容", value=content, inline=False)
                 log_embed.add_field(name="画像/動画リンク", value=media_url, inline=False)
                 await log_channel.send(embed=log_embed)
-
         except Exception as e:
             await message.channel.send(f"⚠️ DMの送信に失敗しました: {e}")
     else:
