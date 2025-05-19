@@ -593,6 +593,20 @@ async def on_message(message):
             ]
             await message.channel.send(random.choice(responses))
 
+    # 存在しないコマンドに反応する処理
+    if message.content.startswith("t!"):
+        known_prefixes = [
+            't!help', 't!say', 't!shutdown', 't!restart', 't!omikuji',
+            't!yamu', 't!ai', 't!user', 't!stats', 't!mittyan',
+            't!serverinfo', 't!admin', 't!dm', 't!dmu', 't!chatgpt'
+        ]
+        if message.content.strip() == "t!":
+            return  # 単に "t!" だけなら無視（何も反応しない）
+
+        if not any(message.content.startswith(cmd) for cmd in known_prefixes):
+            await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
+
+
     # みっちゃんのステータス（オンライン・オフライン）を監視するイベント
 @client.event
 async def on_presence_update(before, after):
