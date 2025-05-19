@@ -185,6 +185,54 @@ async def on_message(message):
         else:
             await message.channel.send("🛑 管理者専用コマンドです。")
         return
+
+    # t!dmu コマンド（管理者限定：埋め込み付きDM送信）
+    if message.content.startswith('t!dmu'):
+        if message.author.id in admin_ids:
+            parts = message.content.split(' ', 4)
+            if len(parts) < 5:
+                await message.channel.send("使い方：t!dmu [ユーザーIDまたはメンション] [題名] [内容] [画像・動画URL（none可）]")
+                return
+            try:
+                user_arg = parts[1]
+
+                # メンション形式の場合はIDに変換
+                if user_arg.startswith("<@") and user_arg.endswith(">"):
+                    user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
+
+                user_id = int(user_arg)
+                dm_user = await client.fetch_user(user_id)
+
+                title = parts[2]
+                content = parts[3]
+                media_url = parts[4]
+
+                # 埋め込みメッセージを作成
+                embed = discord.Embed(title=title, description=content, color=discord.Color.blue())
+                if media_url.lower() != "none":
+                    embed.set_image(url=media_url)
+
+                # DM送信
+                await dm_user.send(embed=embed)
+                await message.channel.send(f"✅ ユーザー {dm_user.name} に埋め込みDMを送信しました。")
+
+                # ログチャンネルに送信
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    log_embed = discord.Embed(title="📩 埋め込みDM送信ログ", color=discord.Color.dark_blue())
+                    log_embed.add_field(name="実行者", value=f"{message.author.display_name}（ID: {message.author.id}）", inline=False)
+                    log_embed.add_field(name="送信先", value=f"{dm_user.name}（ID: {dm_user.id}）", inline=False)
+                    log_embed.add_field(name="題名", value=title, inline=False)
+                    log_embed.add_field(name="内容", value=content, inline=False)
+                    log_embed.add_field(name="画像/動画リンク", value=media_url, inline=False)
+                    await log_channel.send(embed=log_embed)
+
+            except Exception as e:
+                await message.channel.send(f"⚠️ DMの送信に失敗しました: {e}")
+        else:
+            await message.channel.send("🛑 管理者専用コマンドです。")
+        return
+    
     
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
@@ -201,11 +249,12 @@ async def on_message(message):
             embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!user [ユーザーID]", value="ユーザー情報を表示してくれます（サーバー管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!user [ユーザーID/メンション]", value="ユーザー情報を表示してくれます（サーバー管理者限定）", inline=False)
             embed.add_field(name="🟢 t!stats", value="このボットのステータスを表示します（サーバー管理者限定）", inline=False)
             embed.add_field(name="🟢 t!mittyan", value="❌❌❌❌（VIP限定）", inline=False)
             embed.add_field(name="🟢 t!serverinfo", value="サーバーの詳細を表示します（サーバー管理者限定）", inline=False)
             embed.add_field(name="🟢 t!dm [メンバーID/メンション] [メッセージ]", value="メンバーにDMを送ります（ボット管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!dmu [メンバーID/メンション] [題名] [内容] [画像リンク/none]", value="メンバーに埋め込みメッセージでDMを送ります（ボット管理者限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
