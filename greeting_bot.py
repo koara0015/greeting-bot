@@ -140,6 +140,51 @@ async def on_message(message):
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
+
+    # t!dm コマンド（管理者限定で指定ユーザーにDMを送る）
+    if message.content.startswith('t!dm'):
+        if message.author.id in admin_ids:
+            parts = message.content.split(' ', 2)
+            if len(parts) < 3:
+                await message.channel.send("使い方：t!dm [ユーザーID または メンション] [メッセージ]")
+                return
+            try:
+                user_arg = parts[1]
+
+                # メンション形式（<@1234567890> または <@!1234567890>）をIDに変換
+                if user_arg.startswith("<@") and user_arg.endswith(">"):
+                    user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
+
+                user_id = int(user_arg)
+                dm_user = await client.fetch_user(user_id)
+                dm_content = parts[2]
+
+                # メッセージが500文字を超えたら却下
+                if len(dm_content) > 500:
+                    await message.channel.send("⚠️ メッセージが長すぎます（500文字以内にしてください）。")
+                    return
+
+                # DM送信
+                await dm_user.send(dm_content)
+                await message.channel.send(f"✅ ユーザー {dm_user.name} にDMを送信しました。")
+
+                # ログチャンネルに記録
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    embed = discord.Embed(
+                        title="📩 DM送信ログ",
+                        color=discord.Color.dark_blue()
+                    )
+                    embed.add_field(name="実行者", value=f"{message.author.display_name}（ID: {message.author.id}）", inline=False)
+                    embed.add_field(name="送信先", value=f"{dm_user.name}（ID: {dm_user.id}）", inline=False)
+                    embed.add_field(name="メッセージ内容", value=dm_content, inline=False)
+                    await log_channel.send(embed=embed)
+
+            except Exception as e:
+                await message.channel.send(f"⚠️ DMの送信に失敗しました: {e}")
+        else:
+            await message.channel.send("🛑 管理者専用コマンドです。")
+        return
     
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
@@ -160,6 +205,7 @@ async def on_message(message):
             embed.add_field(name="🟢 t!stats", value="このボットのステータスを表示します（サーバー管理者限定）", inline=False)
             embed.add_field(name="🟢 t!mittyan", value="❌❌❌❌（VIP限定）", inline=False)
             embed.add_field(name="🟢 t!serverinfo", value="サーバーの詳細を表示します（サーバー管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!dm [メンバーID/メンション] [メッセージ]", value="メンバーにDMを送ります（ボット管理者限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
