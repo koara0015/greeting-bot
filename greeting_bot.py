@@ -186,60 +186,62 @@ async def on_message(message):
             await message.channel.send("🛑 管理者専用コマンドです。")
         return
 
-    # t!dmu コマンド（管理者限定：埋め込み付きDM送信）
-    if message.content.startswith('t!dmu'):
-        # 管理者でなければ却下
-        if message.author.id in admin_ids:
-            # 引数が足りない場合は使い方を表示
-            if message.content.strip() == "t!dmu":
-                await message.channel.send("使い方：t!dmu [ユーザーIDまたはメンション] [題名] [内容] [画像・動画URL（none可）]")
-                return
+# t!dmu コマンド（管理者限定：埋め込み付きDM送信）
+if message.content.startswith('t!dmu'):
+    if message.author.id in admin_ids:
+        if message.content.strip() == "t!dmu":
+            await message.channel.send("使い方：t!dmu [ユーザーIDまたはメンション] [題名] [内容] [画像・動画URL（none可）]")
+            return
 
-            # 引数を分割（最大4個まで）
-            parts = message.content.split(' ', 4)
-            if len(parts) < 5:
-                await message.channel.send("⚠️ 引数が足りません。\n使い方：t!dmu [ユーザーIDまたはメンション] [題名] [内容] [画像・動画URL（none可）]")
-                return
+        parts = message.content.split(' ', 4)
+        if len(parts) < 5:
+            await message.channel.send("⚠️ 引数が足りません。\n使い方：t!dmu [ユーザーIDまたはメンション] [題名] [内容] [画像・動画URL（none可）]")
+            return
 
-            try:
-                user_arg = parts[1]  # 対象ユーザーIDまたはメンション
+        try:
+            user_arg = parts[1]
 
-                # メンション形式ならIDに変換（<@1234567890> → 1234567890）
-                if user_arg.startswith("<@") and user_arg.endswith(">"):
-                    user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
+            # メンションをIDに変換
+            if user_arg.startswith("<@") and user_arg.endswith(">"):
+                user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
 
-                user_id = int(user_arg)
-                dm_user = await client.fetch_user(user_id)  # 対象ユーザーを取得
+            user_id = int(user_arg)
+            dm_user = await client.fetch_user(user_id)
 
-                title = parts[2]      # 題名
-                content = parts[3]    # 内容
-                media_url = parts[4]  # 画像・動画URL
+            title = parts[2].strip()
+            content = parts[3].strip()
+            media_url = parts[4].strip()
 
-                # 埋め込みメッセージを作成
-                embed = discord.Embed(title=title, description=content, color=discord.Color.blue())
-                if media_url.lower() != "none":
-                    embed.set_image(url=media_url)
+            # embed を作成
+            embed = discord.Embed(
+                title=title,
+                description=content,
+                color=discord.Color.blue()
+            )
 
-                # DM送信
-                await dm_user.send(embed=embed)
-                await message.channel.send(f"✅ ユーザー {dm_user.name} に埋め込みDMを送信しました。")
+            if media_url.lower() != "none":
+                embed.set_image(url=media_url)
 
-                # ログ送信（送信者・宛先・内容すべて含める）
-                log_channel = client.get_channel(notify_channel_id)
-                if log_channel:
-                    log_embed = discord.Embed(title="📩 埋め込みDM送信ログ", color=discord.Color.dark_blue())
-                    log_embed.add_field(name="実行者", value=f"{message.author.display_name}（ID: {message.author.id}）", inline=False)
-                    log_embed.add_field(name="送信先", value=f"{dm_user.name}（ID: {dm_user.id}）", inline=False)
-                    log_embed.add_field(name="題名", value=title, inline=False)
-                    log_embed.add_field(name="内容", value=content, inline=False)
-                    log_embed.add_field(name="画像/動画リンク", value=media_url, inline=False)
-                    await log_channel.send(embed=log_embed)
+            # ✅ DM送信（embedのみ）
+            await dm_user.send(embed=embed)
+            await message.channel.send(f"✅ ユーザー {dm_user.name} に埋め込みDMを送信しました。")
 
-            except Exception as e:
-                await message.channel.send(f"⚠️ DMの送信に失敗しました: {e}")
-        else:
-            await message.channel.send("🛑 管理者専用コマンドです。")
-        return
+            # ✅ ログ送信
+            log_channel = client.get_channel(notify_channel_id)
+            if log_channel:
+                log_embed = discord.Embed(title="📩 埋め込みDM送信ログ", color=discord.Color.dark_blue())
+                log_embed.add_field(name="実行者", value=f"{message.author.display_name}（ID: {message.author.id}）", inline=False)
+                log_embed.add_field(name="送信先", value=f"{dm_user.name}（ID: {dm_user.id}）", inline=False)
+                log_embed.add_field(name="題名", value=title, inline=False)
+                log_embed.add_field(name="内容", value=content, inline=False)
+                log_embed.add_field(name="画像/動画リンク", value=media_url, inline=False)
+                await log_channel.send(embed=log_embed)
+
+        except Exception as e:
+            await message.channel.send(f"⚠️ DMの送信に失敗しました: {e}")
+    else:
+        await message.channel.send("🛑 管理者専用コマンドです。")
+    return
     
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
