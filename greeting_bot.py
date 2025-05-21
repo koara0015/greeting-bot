@@ -207,7 +207,6 @@ async def on_message(message):
             embed.add_field(name="🟢 t!mittyan", value="❌❌❌❌（VIP限定）", inline=False)
             embed.add_field(name="🟢 t!serverinfo", value="サーバーの詳細を表示します（サーバー管理者限定）", inline=False)
             embed.add_field(name="🟢 t!dm [メンバーID/メンション] [メッセージ]", value="メンバーにDMを送ります（ボット管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!dmu [メンバーID/メンション] [題名] [内容] [画像リンク/none]", value="メンバーに埋め込みメッセージでDMを送ります（ボット管理者限定）", inline=False)
             embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
             await message.channel.send(embed=embed)
         else:
