@@ -186,7 +186,8 @@ async def on_message(message):
             await message.channel.send("🛑 管理者専用コマンドです。")
         return
 
-# t!dmu コマンド（管理者限定：埋め込み付きDM送信）
+
+        # t!dmu コマンド（管理者限定：埋め込み付きDM送信）
 if message.content.startswith('t!dmu'):
     if message.author.id in admin_ids:
         if message.content.strip() == "t!dmu":
@@ -242,6 +243,8 @@ if message.content.startswith('t!dmu'):
     else:
         await message.channel.send("🛑 管理者専用コマンドです。")
     return
+
+    
     
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
