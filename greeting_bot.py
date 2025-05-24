@@ -558,31 +558,5 @@ async def on_message(message):
         if not any(message.content.startswith(cmd) for cmd in known_prefixes):
             await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
 
-
-    # みっちゃんのステータス（オンライン・オフライン）を監視するイベント
-@client.event
-async def on_presence_update(before, after):
-    # みっちゃんのユーザーID
-    target_user_id = 1018830502288953354
-    notify_channel_id = 1371688028652965980
-
-    # 対象がみっちゃん以外なら無視
-    if after.id != target_user_id:
-        return
-
-    # ステータスが変化したとき
-    if before.status != after.status:
-        channel = client.get_channel(notify_channel_id)
-        if not channel:
-            print("通知チャンネルが見つかりませんでした")
-            return
-
-        # オンラインになったとき
-        if after.status == discord.Status.online:
-            await channel.send("🟢みっちゃんがオンラインになりました")
-        # オフラインになったとき
-        elif after.status == discord.Status.offline:
-            await channel.send("🔴みっちゃんがオフラインになりました")
-
 # Botの起動
 client.run(TOKEN)
