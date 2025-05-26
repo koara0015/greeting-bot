@@ -229,7 +229,7 @@ async def on_message(message):
             await message.channel.send("🛑 オーナーとVIP専用コマンドです。")
         return
 
-        # t!serverinfo コマンド（サーバー情報を表示・モデレーター限定）
+            # t!serverinfo コマンド（サーバー情報を表示・モデレーター限定）
     if message.content == 't!serverinfo':
         if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             guild = message.guild
@@ -246,7 +246,7 @@ async def on_message(message):
                 title=f"📊 サーバー情報：{guild.name}",
                 color=discord.Color.teal()
             )
-            embed.set_thumbnail(url=guild.icon.url if guild.icon else discord.Embed.Empty)
+            embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
             embed.add_field(name="サーバー名", value=guild.name, inline=False)
             embed.add_field(name="サーバーID", value=str(guild.id), inline=False)
             embed.add_field(name="総参加人数", value=f"{total_members}人", inline=True)
