@@ -230,7 +230,7 @@ async def on_message(message):
         return
 
         # t!serverinfo コマンド（サーバー情報を表示・モデレーター限定）
-    if message.content == 't!serverinfo':
+     if message.content == 't!serverinfo':
         if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             guild = message.guild
             owner_user = guild.owner
