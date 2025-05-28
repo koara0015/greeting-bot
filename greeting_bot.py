@@ -446,6 +446,7 @@ async def on_message(message):
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
+    # t!omikuji コマンド
     if message.content == 't!omikuji':
         today = datetime.now().date()
         user_id = message.author.id
@@ -477,11 +478,6 @@ async def on_message(message):
 
         await message.channel.send(f"🎴 おみくじの結果：**{result}**！\n{comment}")
 
-        # ログチャンネルに通知
-        log_channel = client.get_channel(notify_channel_id)
-        if log_channel:
-            await log_channel.send(f"{message.author.display_name} さんがおみくじを実行しました。")
-        return
 
         # t!ai コマンド（なんちゃってAI返信）
     if message.content.startswith('t!ai'):
