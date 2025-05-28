@@ -245,6 +245,7 @@ async def on_message(message):
             embed.add_field(name="🟢 t!shutdown", value="Botを終了します（オーナー限定）", inline=False)
             embed.add_field(name="🟢 t!restart", value="Botを再起動します（オーナー限定）", inline=False)
             embed.add_field(name="🟢 t!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（サーバー管理者限定）", inline=False)
+            embed.add_field(name="🟢 t!ping", value="Botの応答速度を表示します（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
             embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（モデレーター以上限定）", inline=False)
             embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
