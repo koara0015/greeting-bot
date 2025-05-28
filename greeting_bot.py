@@ -262,36 +262,50 @@ async def on_message(message):
         return
 
 
-        # DMから匿名投稿する処理（t!tokumei のみ反応）
+    # DMから匿名投稿する処理（"t!tokumei " で始まるメッセージのみ対応）
     if isinstance(message.channel, discord.DMChannel) and message.content.startswith("t!tokumei "):
     try:
+        # コマンド部分 "t!tokumei " を除いたメッセージ本文を取得
         content = message.content[len("t!tokumei "):].strip()
+
+        # メッセージが空だった場合は却下
         if not content:
             await message.channel.send("⚠️ メッセージが空です。")
             return
 
+        # 表示名として使うランダムな匿名ユーザー名一覧
         anonymous_names = [
             "匿名A", "匿名B", "匿名X", "匿名ユーザー42",
             "匿名希望", "ななしさん", "名無しの戦士", "？", "匿名の誰か"
         ]
+        # 上記リストからランダムに1つ選ぶ
         anon_name = random.choice(anonymous_names)
 
-        anon_channel = client.get_channel(1376785231960346644)  # 匿名投稿チャンネル
+        # 匿名メッセージを送る先のチャンネルを取得（チャンネルIDはあなたの指定）
+        anon_channel = client.get_channel(1376785231960346644)
         if not anon_channel:
             await message.channel.send("⚠️ 匿名チャンネルが見つかりませんでした。")
             return
 
+        # 匿名メッセージを埋め込み形式で作成
         embed = discord.Embed(
-            description=content,
-            color=discord.Color.dark_gray(),
-            timestamp=datetime.utcnow()
+            description=content,                         # 本文
+            color=discord.Color.dark_gray(),            # 色（グレー系）
+            timestamp=datetime.utcnow()                 # 投稿時間（オプション）
         )
-        embed.set_author(name=anon_name)
+        embed.set_author(name=anon_name)                # 匿名ユーザー名として表示
+
+        # 匿名チャンネルにメッセージを送信
         await anon_channel.send(embed=embed)
 
+        # 投稿者（DM送信者）に送信完了メッセージを返す
         await message.channel.send("✅ 匿名メッセージを投稿しました！")
+
     except Exception as e:
+        # エラーが発生した場合は送信者にエラーメッセージを返す
         await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+    
+    # 他の処理と重複しないよう return でここで終わらせる
     return
 
 
