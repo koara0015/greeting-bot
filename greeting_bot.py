@@ -80,8 +80,8 @@ async def on_message(message):
         else:
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
-        
-    # t!say コマンド（Botが指定チャンネルに発言）
+
+        # t!say コマンド（Botが指定チャンネルに発言）
     if message.content.startswith('t!say'):
         if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
             parts = message.content.split(' ', 2)
@@ -98,6 +98,15 @@ async def on_message(message):
                 # オーナー以外が他サーバーを指定していたら却下
                 if message.author.id != owner_id and target_channel.guild.id != message.guild.id:
                     await message.channel.send("⚠️ 他のサーバーのチャンネルには送信できません。")
+
+                    # ログ（埋め込みで送信）
+                    log_channel = client.get_channel(notify_channel_id)
+                    if log_channel:
+                        embed = discord.Embed(title="🚫 t!say 実行却下", color=discord.Color.red())
+                        embed.add_field(name="実行者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                        embed.add_field(name="理由", value="他サーバーのチャンネルが指定された", inline=False)
+                        embed.add_field(name="入力内容", value=parts[2], inline=False)
+                        await log_channel.send(embed=embed)
                     return
 
             # ② 数字でチャンネルIDを指定した場合
@@ -107,6 +116,15 @@ async def on_message(message):
                     target_channel = client.get_channel(channel_id)
                     if message.author.id != owner_id and target_channel and target_channel.guild.id != message.guild.id:
                         await message.channel.send("⚠️ 他のサーバーのチャンネルには送信できません。")
+
+                        # ログ（埋め込み）
+                        log_channel = client.get_channel(notify_channel_id)
+                        if log_channel:
+                            embed = discord.Embed(title="🚫 t!say 実行却下", color=discord.Color.red())
+                            embed.add_field(name="実行者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                            embed.add_field(name="理由", value="他サーバーのチャンネルが指定された", inline=False)
+                            embed.add_field(name="入力内容", value=parts[2], inline=False)
+                            await log_channel.send(embed=embed)
                         return
                 except:
                     await message.channel.send("⚠️ チャンネルIDの形式が正しくありません。")
@@ -117,29 +135,57 @@ async def on_message(message):
                 return
 
             # ③ リンクが含まれていたら却下
-            if "http://" in parts[2] or "https://" in parts[2] or "www." in parts[2] or "discord.gg" in parts[2]:
+            has_link = "http://" in parts[2] or "https://" in parts[2] or "www." in parts[2] or "discord.gg" in parts[2]
+            if has_link:
                 await message.channel.send("⚠️ リンクが含まれているため却下しました。")
+
+                # ログ（埋め込み）
                 log_channel = client.get_channel(notify_channel_id)
                 if log_channel:
-                    await log_channel.send(f"⚠️ {message.author.display_name} によるリンク投稿を却下しました：{parts[2]}")
+                    embed = discord.Embed(title="🚫 t!say 実行却下", color=discord.Color.red())
+                    embed.add_field(name="実行者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                    embed.add_field(name="理由", value="リンクが含まれていた", inline=False)
+                    embed.add_field(name="入力内容", value=parts[2], inline=False)
+                    await log_channel.send(embed=embed)
                 return
 
             # ④ メッセージが200文字を超えていたら却下
-            if len(parts[2]) > 200:
+            too_long = len(parts[2]) > 200
+            if too_long:
                 await message.channel.send("⚠️ メッセージが長すぎます（200文字以内にしてください）。")
+
+                # ログ（埋め込み）
                 log_channel = client.get_channel(notify_channel_id)
                 if log_channel:
-                    await log_channel.send(f"⚠️ {message.author.display_name} のメッセージが長すぎたため却下されました（{len(parts[2])}文字）。")
+                    embed = discord.Embed(title="🚫 t!say 実行却下", color=discord.Color.red())
+                    embed.add_field(name="実行者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                    embed.add_field(name="理由", value=f"{len(parts[2])}文字のメッセージは長すぎる", inline=False)
+                    embed.add_field(name="入力内容", value=parts[2], inline=False)
+                    await log_channel.send(embed=embed)
                 return
 
+            # ⑤ 送信と成功ログ（埋め込み）
             try:
                 await target_channel.send(parts[2])
                 await message.channel.send("✅ メッセージを送信しました")
+
+                log_channel = client.get_channel(notify_channel_id)
+                if log_channel:
+                    embed = discord.Embed(title="📤 t!say 実行ログ", color=discord.Color.green())
+                    embed.add_field(name="実行者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                    embed.add_field(name="送信先", value=f"{target_channel.name}（ID: {target_channel.id}）", inline=False)
+                    embed.add_field(name="サーバー", value=f"{target_channel.guild.name}", inline=False)
+                    embed.add_field(name="送信内容", value=parts[2], inline=False)
+                    embed.add_field(name="リンク含む？", value="✅ はい" if has_link else "❌ いいえ", inline=True)
+                    embed.add_field(name="文字数オーバー？", value="✅ はい" if too_long else "❌ いいえ", inline=True)
+                    await log_channel.send(embed=embed)
+
             except Exception as e:
                 await message.channel.send(f"⚠️ エラーが発生しました: {e}")
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
+        
 
     # t!dm コマンド（管理者限定で指定ユーザーにDMを送る）
     if message.content.startswith('t!dm'):
