@@ -357,7 +357,7 @@ async def on_message(message):
                 color=discord.Color.purple()
             )
             embed.add_field(name="起動時間", value=f"{hours}時間 {minutes}分 {seconds}秒", inline=False)
-            embed.add_field(name="コマンド数", value="現在対応しているコマンド数: 約10個", inline=False)
+            embed.add_field(name="コマンド数", value="現在対応しているコマンド数: 14個", inline=False)
             embed.add_field(name="ユーザー数", value=f"{len(message.guild.members)}人", inline=False)
 
             await message.channel.send(embed=embed)
