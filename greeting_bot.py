@@ -592,6 +592,18 @@ async def on_message(message):
         await message.channel.send(embed=embed)
         return
 
+
+        # t!ping コマンド（応答速度を表示）
+    if message.content == 't!ping':
+        latency = round(client.latency * 1000)  # 秒 → ミリ秒に変換
+        embed = discord.Embed(
+            title="🏓 Pong!",
+            description=f"Botの応答速度は `{latency}ms` です。",
+            color=discord.Color.green()
+        )
+        await message.channel.send(embed=embed)
+        return
+
     # 雑談の自動返信（コマンドじゃないメッセージだけ）
     if not message.content.startswith("t!") and message.content.strip():
         text = message.content.lower()
