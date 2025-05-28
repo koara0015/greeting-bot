@@ -561,6 +561,36 @@ async def on_message(message):
 
         await message.channel.send(random.choice(responses))
 
+
+        # t!avatar コマンド（アバターを表示）
+    if message.content.startswith('t!avatar'):
+        parts = message.content.split()
+
+        target_user = message.author  # デフォルトは自分
+        if len(parts) == 2:
+            user_arg = parts[1]
+
+            # メンション形式（<@1234567890> や <@!1234567890>）に対応
+            if user_arg.startswith("<@") and user_arg.endswith(">"):
+                user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
+
+            try:
+                user_id = int(user_arg)
+                target_user = await client.fetch_user(user_id)
+            except:
+                await message.channel.send("⚠️ ユーザーが見つかりませんでした。")
+                return
+
+        avatar_url = target_user.avatar.url if target_user.avatar else target_user.default_avatar.url
+
+        embed = discord.Embed(
+            title=f"{target_user.name} のアバター",
+            color=discord.Color.blurple()
+        )
+        embed.set_image(url=avatar_url)
+        await message.channel.send(embed=embed)
+        return
+
     # 雑談の自動返信（コマンドじゃないメッセージだけ）
     if not message.content.startswith("t!") and message.content.strip():
         text = message.content.lower()
