@@ -261,39 +261,41 @@ async def on_message(message):
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
-    # DMから匿名投稿する処理（匿名名はランダム）
-    if isinstance(message.channel, discord.DMChannel):
-        try:
-            content = message.content.strip()
-            if not content:
-                await message.channel.send("⚠️ 空のメッセージは送れません。")
-                return
 
-            anonymous_names = [
-                "匿名A", "匿名B", "匿名X", "匿名ユーザー42",
-                "匿名希望", "ななしさん", "名無しの戦士", "？", "匿名の誰か"
-            ]
-            anon_name = random.choice(anonymous_names)
+        # DMから匿名投稿する処理（t!tokumei のみ反応）
+    if isinstance(message.channel, discord.DMChannel) and message.content.startswith("t!tokumei "):
+    try:
+        content = message.content[len("t!tokumei "):].strip()
+        if not content:
+            await message.channel.send("⚠️ メッセージが空です。")
+            return
 
-            anon_channel = client.get_channel(1376785231960346644)  # 匿名投稿チャンネルID
-            if not anon_channel:
-                await message.channel.send("⚠️ 匿名チャンネルが見つかりませんでした。")
-                return
+        anonymous_names = [
+            "匿名A", "匿名B", "匿名X", "匿名ユーザー42",
+            "匿名希望", "ななしさん", "名無しの戦士", "？", "匿名の誰か"
+        ]
+        anon_name = random.choice(anonymous_names)
 
-            embed = discord.Embed(
-                description=content,
-                color=discord.Color.dark_gray(),
-                timestamp=datetime.utcnow()
-            )
-            embed.set_author(name=anon_name)
-            await anon_channel.send(embed=embed)
+        anon_channel = client.get_channel(1376785231960346644)  # 匿名投稿チャンネル
+        if not anon_channel:
+            await message.channel.send("⚠️ 匿名チャンネルが見つかりませんでした。")
+            return
 
-            await message.channel.send("✅ 匿名メッセージを投稿しました！")
-        except Exception as e:
-            await message.channel.send(f"⚠️ エラーが発生しました: {e}")
-        return
+        embed = discord.Embed(
+            description=content,
+            color=discord.Color.dark_gray(),
+            timestamp=datetime.utcnow()
+        )
+        embed.set_author(name=anon_name)
+        await anon_channel.send(embed=embed)
+
+        await message.channel.send("✅ 匿名メッセージを投稿しました！")
+    except Exception as e:
+        await message.channel.send(f"⚠️ エラーが発生しました: {e}")
+    return
+
+
     
-            
         # t!chatgpt コマンド（API制限メッセージ）
     if message.content.startswith("t!chatgpt"):
         await message.channel.send("🔴 API制限に達したため利用不可です。")
