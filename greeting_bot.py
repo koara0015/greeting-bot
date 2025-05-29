@@ -399,43 +399,6 @@ async def on_message(message):
         await message.channel.send(f"🎴 おみくじの結果：**{result}**！\n{comment}")
 
 
-        # t!ai コマンド（なんちゃってAI返信）
-    if message.content.startswith('t!ai'):
-        prompt = message.content[5:].strip()
-        if not prompt:
-            await message.channel.send("使い方：t!ai [質問やメッセージ]")
-            return
-
-        responses = [
-            f"とりあえずDiscordを閉じてから考えたら？",
-            f"口臭いからもう話さない方がいいんじゃない？",
-            f"下ネタやめてください！セクハラですよ！",
-            f"{prompt} ね、僕にはわかるけどお前には教えてやんない",
-            f"すみません、よくわかりませんでした。",
-            f"自分で考えたら？",
-            f"ggrks",
-            f"自分で調べたら？",
-            f"お母さんにでも聞いたら？",
-            f"そもそも誰お前。",
-            f"何でそんなに滑舌悪いのに早口で喋ってるの？",
-            f"そういうのはボットに聞くべきじゃないと思う",
-            f"下ネタやめてください。",
-            f"AIと話してて人生楽しいの？",
-            f"まずはDiscordを開きたまごのお部屋というサーバーを開く。その後メンバー達が助けてくれて解決する。",
-            f"死ね。",
-            f"もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ",
-            f"（急に話しかけてきたけど誰だこいつ）"
-            f"そういうことはたまごに言おうね"
-            f"そういうことは管理者に言おうね"
-            f"そういうことは友達に言おうね"
-            f"ボットに話しかけるってことは友達いないの？"
-            f"普通に臭いから話しかけないで。"
-            f"お前風呂キャンセル界隈か？インターネット越しに臭うぞ"
-        ]
-
-        await message.channel.send(random.choice(responses))
-
-
         # t!avatar コマンド（アバターを表示）
     if message.content.startswith('t!avatar'):
         parts = message.content.split()
@@ -531,6 +494,7 @@ async def setup_hook():
     await client.load_extension("cogs.say")   # ← say.py を追加
     await client.load_extension("cogs.admin")  # ← admin.py を読み込む
     await client.load_extension("cogs.tokumei")  # tokumei.py を読み込む
+    await client.load_extension("cogs.ai") # ai.pyを読み込む
 
 # トークン未設定チェック
 if not TOKEN:
