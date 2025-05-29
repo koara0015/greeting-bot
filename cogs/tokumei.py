@@ -1,32 +1,30 @@
 import discord
 from discord.ext import commands
+from discord import app_commands
+import random
 
 class Tokumei(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # t!tokumei（DMコマンド）
     @commands.command(name="tokumei")
     async def tokumei_dm_command(self, ctx, *, message: str = None):
-        """DM限定：匿名メッセージ送信機能"""
         anon_channel_id = 1376785231960346644
         log_channel_id = 1377479769687330848
 
-        # DM以外からの実行は拒否
         if ctx.guild is not None:
             await ctx.send("⚠️ このコマンドはDMでのみ使用できます。")
             return
 
-        # 入力チェック
         if not message:
             await ctx.send("使い方：t!tokumei [匿名で送りたいメッセージ]")
             return
 
-        # チェック①：リンク含むか
         if "http://" in message or "https://" in message or "discord.gg" in message:
             await ctx.send("⚠️ 匿名メッセージにリンクは使えません。")
             return
 
-        # チェック②：200文字以上
         if len(message) > 200:
             await ctx.send("⚠️ メッセージは200文字以内にしてください。")
             return
@@ -37,7 +35,6 @@ class Tokumei(commands.Cog):
                 await anon_channel.send(f"📩 匿名メッセージ：\n{message}")
                 await ctx.send("✅ 匿名メッセージを送信しました！")
 
-                # ログ送信
                 log_channel = self.bot.get_channel(log_channel_id)
                 if log_channel:
                     embed = discord.Embed(title="📋 匿名メッセージログ", color=discord.Color.orange())
@@ -50,18 +47,7 @@ class Tokumei(commands.Cog):
         except Exception as e:
             await ctx.send(f"⚠️ エラーが発生しました: {e}")
 
-async def setup(bot):
-    await bot.add_cog(Tokumei(bot))
-
-from discord import app_commands
-import random
-
-class Tokumei(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-
-    # 既にここには t!tokumei コマンドがあります（上に貼ったやつ）
-
+    # /tokumei（スラッシュコマンド）
     @app_commands.command(name="tokumei", description="匿名でメッセージを送信します（全員可）")
     @app_commands.describe(message="匿名で投稿したいメッセージ内容")
     async def tokumei_slash_command(self, interaction: discord.Interaction, message: str):
@@ -70,12 +56,10 @@ class Tokumei(commands.Cog):
         anon_channel_id = 1376785231960346644
         log_channel_id = 1377479769687330848
 
-        # チェック①：リンク禁止
         if "http://" in message or "https://" in message or "discord.gg/" in message:
             await interaction.followup.send("⚠️ 匿名メッセージにリンクは使用できません。")
             return
 
-        # チェック②：200文字以内
         if len(message) > 200:
             await interaction.followup.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
             return
@@ -93,7 +77,6 @@ class Tokumei(commands.Cog):
 
             await interaction.followup.send("✅ 匿名メッセージを送信しました！")
 
-            # ログ送信
             log_channel = self.bot.get_channel(log_channel_id)
             if log_channel:
                 embed = discord.Embed(title="匿名メッセージログ", color=discord.Color.orange())
@@ -104,3 +87,7 @@ class Tokumei(commands.Cog):
         except Exception as e:
             print(f"Webhookエラー: {e}")
             await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
+
+# Cogとして読み込む準備
+async def setup(bot):
+    await bot.add_cog(Tokumei(bot))
