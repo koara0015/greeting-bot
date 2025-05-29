@@ -33,6 +33,8 @@ omikuji_usage = {}
 # Botが起動したときに実行される処理
 @client.event
 async def on_ready():
+    await tree.sync()  # ✅ スラッシュコマンドを登録！
+
     print(f'ログインしました：{client.user}')
     channel_id = 1371322394719031396  # 通知を送るチャンネルのID
     await client.wait_until_ready()
