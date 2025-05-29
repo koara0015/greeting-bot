@@ -668,17 +668,6 @@ async def on_message(message):
         return
 
 
-        # t!ping コマンド（応答速度を表示）
-    if message.content == 't!ping':
-        latency = round(client.latency * 1000)  # 秒 → ミリ秒に変換
-        embed = discord.Embed(
-            title="🏓 Pong!",
-            description=f"Botの応答速度は `{latency}ms` です。",
-            color=discord.Color.green()
-        )
-        await message.channel.send(embed=embed)
-        return
-
     # 雑談の自動返信（コマンドじゃないメッセージだけ）
     if not message.content.startswith("t!") and message.content.strip():
         text = message.content.lower()
@@ -788,6 +777,15 @@ async def tokumei_command(interaction: discord.Interaction, message: str):
 if not TOKEN:
     print("❌ エラー: DISCORD_TOKEN が設定されていません。")
     exit()
+    
+    async def load_cogs():
+    await client.load_extension("cogs.ping")  # ping.py を読み込む
 
 # Botの起動
-client.run(TOKEN)
+if __name__ == "__main__":
+    if not TOKEN:
+        print("❌ エラー: DISCORD_TOKEN が設定されていません。")
+        exit()
+
+    asyncio.run(load_cogs())  # Cog を読み込む
+    client.run(TOKEN)
