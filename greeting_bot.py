@@ -22,8 +22,6 @@ client = commands.Bot(command_prefix="t!", intents=intents)
 
 from discord import app_commands  # これもインポートに追加！
 
-tree = app_commands.CommandTree(client)
-
 # ✅ 起動時に一度だけ記録される
 start_time = datetime.now()
 
