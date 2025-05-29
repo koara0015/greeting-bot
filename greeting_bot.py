@@ -144,27 +144,6 @@ async def on_message(message):
             await message.channel.send("🛑 オーナーとVIP専用コマンドです。")
         return
 
-        # t!stats コマンド（Botのステータス表示・モデレーター以上限定）
-    if message.content == 't!stats':
-        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
-            now = datetime.now()
-            uptime = now - start_time
-            hours, remainder = divmod(int(uptime.total_seconds()), 3600)
-            minutes, seconds = divmod(remainder, 60)
-
-            embed = discord.Embed(
-                title="📊 Botのステータス",
-                color=discord.Color.purple()
-            )
-            embed.add_field(name="起動時間", value=f"{hours}時間 {minutes}分 {seconds}秒", inline=False)
-            embed.add_field(name="コマンド数", value="現在対応しているコマンド数: 14個", inline=False)
-            embed.add_field(name="ユーザー数", value=f"{len(message.guild.members)}人", inline=False)
-
-            await message.channel.send(embed=embed)
-        else:
-            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
-        return
-
     # t!omikuji コマンド
     if message.content == 't!omikuji':
         today = datetime.now().date()
@@ -268,6 +247,7 @@ async def setup_hook():
     await client.load_extension("cogs.admin") # admin.pyを読み込む
     await client.load_extension("cogs.yamu") # yamu.pyを読み込む
     await client.load_extension("cogs.serverinfo") # serverinfo.pyを読み込む
+    await client.load_extension("cogs.stats")  # stats.py を読み込む
 
 # トークン未設定チェック
 if not TOKEN:
