@@ -172,6 +172,7 @@ async def setup_hook():
     await client.load_extension("cogs.chatgpt") # chatgpt.pyを読み込む
     await client.load_extension("cogs.mittyan") # mittyan.pyを読み込む
     await client.load_extension("cogs.omikuji") # omikuji.pyを読み込む
+    await client.load_extension("cogs.help")  # ← help.pyを読み込む
 
 # トークン未設定チェック
 if not TOKEN:
