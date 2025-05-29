@@ -713,51 +713,54 @@ async def on_message(message):
         if not any(message.content.startswith(cmd) for cmd in known_prefixes):
             await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
 
-
+# 匿名/コマンド
 @tree.command(name="tokumei", description="匿名でメッセージを送信します（全員可）")
+@app_commands.describe(message="匿名で投稿したいメッセージ内容")
 async def tokumei_command(interaction: discord.Interaction, message: str):
-    anonymous_channel_id = 1376785231960346644
+    await interaction.response.defer(ephemeral=True)
+
+    anon_channel_id = 1376785231960346644
     log_channel_id = 1377479769687330848
 
-    # ✅ 却下チェック：リンク
-    has_link = any(word in message.lower() for word in ["http://", "https://", "www.", "discord.gg"])
-    if has_link:
-        await interaction.response.send_message("⚠️ リンクが含まれているため投稿できません。", ephemeral=True)
-
-        log_channel = client.get_channel(log_channel_id)
-        if log_channel:
-            embed = discord.Embed(title="🚫 匿名スラッシュ投稿 却下", color=discord.Color.red())
-            embed.add_field(name="送信者", value=f"{interaction.user} (ID: {interaction.user.id})", inline=False)
-            embed.add_field(name="理由", value="リンクが含まれていた", inline=False)
-            embed.add_field(name="内容", value=message, inline=False)
-            await log_channel.send(embed=embed)
+    # チェック①：リンク含んでたら却下
+    if "http://" in message or "https://" in message or "discord.gg/" in message:
+        await interaction.followup.send("⚠️ 匿名メッセージにリンクは使用できません。")
         return
 
-    # ✅ 却下チェック：200文字以上
+    # チェック②：200文字以上はNG
     if len(message) > 200:
-        await interaction.response.send_message("⚠️ メッセージが長すぎます（200文字以内にしてください）。", ephemeral=True)
-
-        log_channel = client.get_channel(log_channel_id)
-        if log_channel:
-            embed = discord.Embed(title="🚫 匿名スラッシュ投稿 却下", color=discord.Color.red())
-            embed.add_field(name="送信者", value=f"{interaction.user} (ID: {interaction.user.id})", inline=False)
-            embed.add_field(name="理由", value=f"{len(message)}文字のメッセージは長すぎる", inline=False)
-            embed.add_field(name="内容", value=message, inline=False)
-            await log_channel.send(embed=embed)
+        await interaction.followup.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
         return
 
-    # 通常投稿
-    anonymous_channel = client.get_channel(anonymous_channel_id)
-    if anonymous_channel:
-        await anonymous_channel.send(f"**匿名の誰か：**\n{message}")
-        await interaction.response.send_message("✅ 匿名メッセージを送信しました！", ephemeral=True)
+    # 匿名名＆アイコン
+    names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん"]
+    icons = [
+        "https://i.imgur.com/aeXFGjF.png",
+        "https://i.imgur.com/HK7QF0n.png",
+        "https://i.imgur.com/5Z8I1sY.png"
+    ]
+    anon_name = random.choice(names)
+    anon_icon = random.choice(icons)
 
-    log_channel = client.get_channel(log_channel_id)
-    if log_channel:
-        embed = discord.Embed(title="📨 匿名スラッシュ投稿", color=discord.Color.dark_gray())
-        embed.add_field(name="送信者", value=f"{interaction.user} (ID: {interaction.user.id})", inline=False)
-        embed.add_field(name="内容", value=message, inline=False)
-        await log_channel.send(embed=embed)
+    try:
+        anon_channel = interaction.client.get_channel(anon_channel_id)
+        webhook = await anon_channel.create_webhook(name=anon_name)
+        await webhook.send(message, avatar_url=anon_icon)
+        await webhook.delete()
+
+        await interaction.followup.send("✅ 匿名メッセージを送信しました！")
+
+        # ログ送信
+        log_channel = interaction.client.get_channel(log_channel_id)
+        if log_channel:
+            embed = discord.Embed(title="匿名メッセージログ", color=discord.Color.orange())
+            embed.add_field(name="送信者", value=f"{interaction.user}（{interaction.user.id}）", inline=False)
+            embed.add_field(name="内容", value=message, inline=False)
+            await log_channel.send(embed=embed)
+
+    except Exception as e:
+        print(f"Webhookエラー: {e}")
+        await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
 
 # Botの起動
 client.run(TOKEN)
