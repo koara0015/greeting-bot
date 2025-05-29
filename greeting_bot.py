@@ -18,7 +18,7 @@ intents.members = True       # ユーザー情報を取得するために必要�
 # Bot本体を作成
 from discord.ext import commands  # これをインポートのところに追加！
 
-client = commands.Bot(command_prefix="t!", intents=intents)
+client = commands.Bot(command_prefix="t!", intents=intents, help_command=None)
 
 from discord import app_commands  # これもインポートに追加！
 tree = client.tree
@@ -172,7 +172,6 @@ async def setup_hook():
     await client.load_extension("cogs.chatgpt") # chatgpt.pyを読み込む
     await client.load_extension("cogs.mittyan") # mittyan.pyを読み込む
     await client.load_extension("cogs.omikuji") # omikuji.pyを読み込む
-    await client.load_extension("cogs.help")  # help.py を読み込む
 
 # トークン未設定チェック
 if not TOKEN:
