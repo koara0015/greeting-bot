@@ -127,11 +127,6 @@ async def on_message(message):
     ):
         await message.channel.send("📬 このコマンドはDMで使ってください！\n例：Botに `t!tokumei 明日テストいやだ` と送ると、匿名で投稿されます。")
         return
-            
-        # t!chatgpt コマンド（API制限メッセージ）
-    if message.content.startswith("t!chatgpt"):
-        await message.channel.send("🔴 API制限に達したため利用不可です。")
-        return
 
         # t!mittyan コマンド（オーナー専用）
     if message.content == 't!mittyan':
@@ -248,6 +243,7 @@ async def setup_hook():
     await client.load_extension("cogs.yamu") # yamu.pyを読み込む
     await client.load_extension("cogs.serverinfo") # serverinfo.pyを読み込む
     await client.load_extension("cogs.stats")  # stats.py を読み込む
+    await client.load_extension("cogs.chatgpt") # chatgpt.pyを読み込む
 
 # トークン未設定チェック
 if not TOKEN:
