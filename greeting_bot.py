@@ -302,15 +302,10 @@ async def on_message(message):
             await message.channel.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
             return
 
-        # 匿名名とアイコン（ランダム）
-        names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん"]
-        icons = [
-            "https://i.imgur.com/aeXFGjF.png",  # お好きな画像に変更可
-            "https://i.imgur.com/HK7QF0n.png",
-            "https://i.imgur.com/5Z8I1sY.png"
-        ]
+        # 匿名名とアイコン（アイコンは真っ白で固定）
+        names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん","DMから失礼します"]
         anon_name = random.choice(names)
-        anon_icon = random.choice(icons)
+        anon_icon = "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
 
         # 投稿先チャンネル取得
         channel = client.get_channel(anon_channel_id)
@@ -758,12 +753,10 @@ async def tokumei_command(interaction: discord.Interaction, message: str):
         await interaction.followup.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
         return
 
-    # 匿名名＆アイコン
-    names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん"]
+    # 匿名名＆アイコン（アイコンは真っ白に統一）
+    names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん","スラッシュコマンドで失礼します"]
     icons = [
-        "https://i.imgur.com/aeXFGjF.png",
-        "https://i.imgur.com/HK7QF0n.png",
-        "https://i.imgur.com/5Z8I1sY.png"
+        "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
     ]
     anon_name = random.choice(names)
     anon_icon = random.choice(icons)
