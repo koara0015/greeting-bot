@@ -180,38 +180,6 @@ async def on_message(message):
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
-
-    # t!admin コマンド（権限一覧を表示）
-    if message.content == 't!admin':
-        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
-            def format_user(user_id):
-                user = message.guild.get_member(user_id)
-                return f"{user.mention}（{user.name}）" if user else f"不明（{user_id}）"
-
-            owner_display = format_user(owner_id)
-            admin_display = [format_user(uid) for uid in admin_ids if uid != owner_id]
-            moderator_display = [
-                format_user(uid)
-                for uid in moderator_ids
-                if uid not in admin_ids and uid != owner_id
-            ]
-            vip_display = [format_user(uid) for uid in vip_ids]
-
-            embed = discord.Embed(
-                title="🛡️ 権限一覧",
-                description="現在設定されているオーナー・管理者・モデレーター・VIPの一覧です。",
-                color=discord.Color.orange()
-            )
-            embed.add_field(name="👑 Owner", value=owner_display, inline=False)
-            embed.add_field(name="🛠️ Admin", value="\n".join(admin_display) or "なし", inline=False)
-            embed.add_field(name="🧑‍💼 Moderator", value="\n".join(moderator_display) or "なし", inline=False)
-            embed.add_field(name="⭐ VIP", value="\n".join(vip_display) or "なし", inline=False)
-
-            await message.channel.send(embed=embed)
-        else:
-            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
-        return
-
         # t!stats コマンド（Botのステータス表示・モデレーター以上限定）
     if message.content == 't!stats':
         if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
@@ -442,6 +410,7 @@ async def setup_hook():
     await client.load_extension("cogs.tokumei")  # tokumei.py を読み込む
     await client.load_extension("cogs.ai") # ai.pyを読み込む
     await client.load_extension("cogs.user")  # user.pyを読み込む
+    await client.load_extension("cogs.admin") # admin.pyを読み込む
 
 # トークン未設定チェック
 if not TOKEN:
