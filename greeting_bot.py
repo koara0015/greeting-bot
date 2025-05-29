@@ -87,52 +87,6 @@ async def on_message(message):
         else:
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
-        
-
-    # t!dm コマンド（管理者限定で指定ユーザーにDMを送る）
-    if message.content.startswith('t!dm'):
-        if message.author.id in admin_ids:
-            parts = message.content.split(' ', 2)
-            if len(parts) < 3:
-                await message.channel.send("使い方：t!dm [ユーザーID または メンション] [メッセージ]")
-                return
-            try:
-                user_arg = parts[1]
-
-                # メンション形式（<@1234567890> または <@!1234567890>）をIDに変換
-                if user_arg.startswith("<@") and user_arg.endswith(">"):
-                    user_arg = user_arg.replace("<@", "").replace("!", "").replace(">", "")
-
-                user_id = int(user_arg)
-                dm_user = await client.fetch_user(user_id)
-                dm_content = parts[2]
-
-                # メッセージが500文字を超えたら却下
-                if len(dm_content) > 500:
-                    await message.channel.send("⚠️ メッセージが長すぎます（500文字以内にしてください）。")
-                    return
-
-                # DM送信
-                await dm_user.send(dm_content)
-                await message.channel.send(f"✅ ユーザー {dm_user.name} にDMを送信しました。")
-
-                # ログチャンネルに記録
-                log_channel = client.get_channel(notify_channel_id)
-                if log_channel:
-                    embed = discord.Embed(
-                        title="📩 DM送信ログ",
-                        color=discord.Color.dark_blue()
-                    )
-                    embed.add_field(name="実行者", value=f"{message.author.display_name}（ID: {message.author.id}）", inline=False)
-                    embed.add_field(name="送信先", value=f"{dm_user.name}（ID: {dm_user.id}）", inline=False)
-                    embed.add_field(name="メッセージ内容", value=dm_content, inline=False)
-                    await log_channel.send(embed=embed)
-
-            except Exception as e:
-                await message.channel.send(f"⚠️ DMの送信に失敗しました: {e}")
-        else:
-            await message.channel.send("🛑 管理者専用コマンドです。")
-        return
 
 
         # DM限定 t!tokumei コマンド処理
@@ -673,6 +627,7 @@ async def tokumei_command(interaction: discord.Interaction, message: str):
 async def setup_hook():
     await client.load_extension("cogs.ping")  # ping.py を読み込む
     await client.load_extension("cogs.say")   # ← say.py を追加
+    await client.load_extension("cogs.admin")  # ← admin.py を読み込む
 
 # トークン未設定チェック
 if not TOKEN:
