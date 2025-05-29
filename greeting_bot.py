@@ -773,19 +773,15 @@ async def tokumei_command(interaction: discord.Interaction, message: str):
         print(f"Webhookエラー: {e}")
         await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
 
-        
+# Cog 読み込み：setup_hookを使う方法（推奨）
+@client.event
+async def setup_hook():
+    await client.load_extension("cogs.ping")  # ping.py を読み込む
+
+# トークン未設定チェック
 if not TOKEN:
     print("❌ エラー: DISCORD_TOKEN が設定されていません。")
     exit()
-    
-    async def load_cogs():
-    await client.load_extension("cogs.ping")  # ping.py を読み込む
 
 # Botの起動
-if __name__ == "__main__":
-    if not TOKEN:
-        print("❌ エラー: DISCORD_TOKEN が設定されていません。")
-        exit()
-
-    asyncio.run(load_cogs())  # Cog を読み込む
-    client.run(TOKEN)
+client.run(TOKEN)
