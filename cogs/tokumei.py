@@ -7,6 +7,16 @@ class Tokumei(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # ✅ サーバー上で t!tokumei が使われたときの注意メッセージ
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if (
+            not isinstance(message.channel, discord.DMChannel)
+            and message.content.startswith("t!tokumei")
+            and not message.author.bot
+        ):
+            await message.channel.send("📬 このコマンドはDMで使ってください！\n例：Botに `t!tokumei 明日テストいやだ` と送ると、匿名で投稿されます。")
+
     # ✅ t!tokumei（DMでのみ使用可）
     @commands.command(name="tokumei")
     async def tokumei_dm_command(self, ctx, *, message: str = None):
@@ -14,22 +24,18 @@ class Tokumei(commands.Cog):
         anon_channel_id = 1376785231960346644
         log_channel_id = 1377479769687330848
 
-        # DM以外からの実行は拒否
         if ctx.guild is not None:
             await ctx.send("⚠️ このコマンドはDMでのみ使用できます。")
             return
 
-        # 入力チェック
         if not message:
             await ctx.send("使い方：t!tokumei [匿名で送りたいメッセージ]")
             return
 
-        # チェック①：リンク含むか
         if "http://" in message or "https://" in message or "discord.gg" in message:
             await ctx.send("⚠️ 匿名メッセージにリンクは使えません。")
             return
 
-        # チェック②：200文字以上
         if len(message) > 200:
             await ctx.send("⚠️ メッセージは200文字以内にしてください。")
             return
@@ -37,7 +43,6 @@ class Tokumei(commands.Cog):
         try:
             anon_channel = self.bot.get_channel(anon_channel_id)
             if anon_channel:
-                # ランダムな名前とアイコン
                 names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん", "スラッシュコマンドで失礼します"]
                 icons = ["https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"]
                 anon_name = random.choice(names)
@@ -49,7 +54,6 @@ class Tokumei(commands.Cog):
 
                 await ctx.send("✅ 匿名メッセージを送信しました！")
 
-                # ログ送信
                 log_channel = self.bot.get_channel(log_channel_id)
                 if log_channel:
                     embed = discord.Embed(title="📋 匿名メッセージログ", color=discord.Color.orange())
@@ -92,7 +96,6 @@ class Tokumei(commands.Cog):
 
             await interaction.followup.send("✅ 匿名メッセージを送信しました！")
 
-            # ログ送信
             log_channel = self.bot.get_channel(log_channel_id)
             if log_channel:
                 embed = discord.Embed(title="📋 匿名メッセージログ", color=discord.Color.orange())
@@ -104,5 +107,6 @@ class Tokumei(commands.Cog):
             print(f"Webhookエラー: {e}")
             await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
 
+# 最後の setup 関数はそのままでOK
 async def setup(bot):
     await bot.add_cog(Tokumei(bot))
