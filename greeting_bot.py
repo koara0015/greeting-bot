@@ -268,6 +268,15 @@ async def on_message(message):
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
+    # サーバー上で t!tokumei が使われたときの注意メッセージ
+    if (
+        not isinstance(message.channel, discord.DMChannel)
+        and message.content.startswith("t!tokumei")
+        and not message.author.bot
+    ):
+        await message.channel.send("📬 このコマンドはDMで使ってください！\n例：Botに `t!tokumei 明日テストいやだ` と送ると、匿名で投稿されます。")
+        return
+
 
 @client.event
 async def on_message(message):
@@ -703,13 +712,30 @@ async def on_message(message):
     # 存在しないコマンドに反応する処理
     if message.content.startswith("t!"):
         known_prefixes = [
-            't!help', 't!say', 't!shutdown', 't!restart', 't!omikuji',
-            't!yamu', 't!ai', 't!user', 't!stats', 't!mittyan',
-            't!serverinfo', 't!admin', 't!dm', 't!dmu', 't!chatgpt'
+            't!help',        # ヘルプ表示
+            't!say',         # 指定チャンネルにメッセージ送信
+            't!shutdown',    # Bot終了（owner限定）
+            't!restart',     # Bot再起動（owner限定）
+            't!omikuji',     # おみくじ（1日1回制限あり）
+            't!yamu',        # 病み構文連投（管理者限定）
+            't!ai',          # なんちゃってAI返信
+            't!user',        # ユーザー情報表示
+            't!stats',       # 使用状況表示
+            't!mittyan',     # みっちゃん生存確認（自動通知）
+            't!serverinfo',  # サーバー情報表示
+            't!admin',       # 管理者向けの設定確認
+            't!dm',          # ユーザーへのDM送信（管理者限定）
+            't!chatgpt',     # OpenAIにメッセージを送る（簡易AI）
+            't!tokumei',     # 匿名投稿（Webhook）
+            't!avatar',      # ユーザーのアイコン表示
+            't!ping'         # 応答速度を表示
         ]
-        if message.content.strip() == "t!":
-            return  # 単に "t!" だけなら無視（何も反応しない）
 
+        # "t!" だけのメッセージは無視
+        if message.content.strip() == "t!":
+            return
+
+        # 一致する既存コマンドがなければ警告
         if not any(message.content.startswith(cmd) for cmd in known_prefixes):
             await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
 
