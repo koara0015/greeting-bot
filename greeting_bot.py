@@ -128,17 +128,6 @@ async def on_message(message):
         await message.channel.send("📬 このコマンドはDMで使ってください！\n例：Botに `t!tokumei 明日テストいやだ` と送ると、匿名で投稿されます。")
         return
 
-        # t!mittyan コマンド（オーナー専用）
-    if message.content == 't!mittyan':
-        if message.author.id == owner_id:
-            await message.channel.send("このサーバーでnukeはご利用いただけません")
-            log_channel = client.get_channel(notify_channel_id)
-            if log_channel:
-                await log_channel.send(f"{message.author.display_name} が t!mittyan を使用しようとしました。")
-        else:
-            await message.channel.send("🛑 オーナーとVIP専用コマンドです。")
-        return
-
     # t!omikuji コマンド
     if message.content == 't!omikuji':
         today = datetime.now().date()
@@ -244,6 +233,7 @@ async def setup_hook():
     await client.load_extension("cogs.serverinfo") # serverinfo.pyを読み込む
     await client.load_extension("cogs.stats")  # stats.py を読み込む
     await client.load_extension("cogs.chatgpt") # chatgpt.pyを読み込む
+    await client.load_extension("cogs.mittyan") # mittyan.pyを読み込む
 
 # トークン未設定チェック
 if not TOKEN:
