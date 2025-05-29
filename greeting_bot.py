@@ -88,15 +88,6 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # サーバー上で t!tokumei が使われたときの注意メッセージ
-    if (
-        not isinstance(message.channel, discord.DMChannel)
-        and message.content.startswith("t!tokumei")
-        and not message.author.bot
-    ):
-        await message.channel.send("📬 このコマンドはDMで使ってください！\n例：Botに `t!tokumei 明日テストいやだ` と送ると、匿名で投稿されます。")
-        return
-
 
     # 雑談の自動返信（コマンドじゃないメッセージだけ）
     if not message.content.startswith("t!") and message.content.strip():
