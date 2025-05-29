@@ -465,9 +465,14 @@ async def on_message(message):
             embed.add_field(name="ユーザー名", value=target_user.name, inline=False)
             embed.add_field(name="ユーザーID", value=target_user.id, inline=False)
             embed.add_field(name="アカウント作成日", value=target_user.created_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
+            try:
+                joined_date = target_member.joined_at.strftime('%Y-%m-%d %H:%M:%S') if target_member and target_member.joined_at else "不明"
+            except:
+                joined_date = "不明"
+
             embed.add_field(
                 name="サーバー参加日",
-                value=target_member.joined_at.strftime('%Y-%m-%d %H:%M:%S') if target_member and target_member.joined_at else "不明",
+                value=joined_date,
                 inline=False
             )
 
@@ -728,6 +733,8 @@ async def on_message(message):
         if not any(message.content.startswith(cmd) for cmd in known_prefixes):
             await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
 
+    await client.process_commands(message)
+
 # 匿名/コマンド
 @tree.command(name="tokumei", description="匿名でメッセージを送信します（全員可）")
 @app_commands.describe(message="匿名で投稿したいメッセージ内容")
@@ -774,6 +781,11 @@ async def tokumei_command(interaction: discord.Interaction, message: str):
     except Exception as e:
         print(f"Webhookエラー: {e}")
         await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
+
+        
+if not TOKEN:
+    print("❌ エラー: DISCORD_TOKEN が設定されていません。")
+    exit()
 
 # Botの起動
 client.run(TOKEN)
