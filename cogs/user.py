@@ -58,5 +58,30 @@ class User(commands.Cog):
         if log_channel:
             await log_channel.send(embed=embed)
 
+    # t!avatarコマンド
+
+    @commands.command(name="avatar")
+    async def avatar_command(self, ctx, arg=None):
+        """ユーザーのアバターを表示（誰でも可）"""
+        target_user = ctx.author
+
+        if arg:
+            if arg.startswith("<@") and arg.endswith(">"):
+                arg = arg.replace("<@", "").replace("!", "").replace(">", "")
+            try:
+                user_id = int(arg)
+                target_user = await self.bot.fetch_user(user_id)
+            except:
+                await ctx.send("⚠️ ユーザーが見つかりませんでした。")
+                return
+
+        avatar_url = target_user.avatar.url if target_user.avatar else target_user.default_avatar.url
+        embed = discord.Embed(
+            title=f"{target_user.name} のアバター",
+            color=discord.Color.blurple()
+        )
+        embed.set_image(url=avatar_url)
+        await ctx.send(embed=embed)
+
 async def setup(bot):
     await bot.add_cog(User(bot))
