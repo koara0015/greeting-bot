@@ -438,7 +438,7 @@ async def on_message(message):
 async def setup_hook():
     await client.load_extension("cogs.ping")  # ping.py を読み込む
     await client.load_extension("cogs.say")   # ← say.py を追加
-    await client.load_extension("cogs.admin")  # ← admin.py を読み込む
+    await client.load_extension("cogs.dm")  # ← dm.py を読み込む
     await client.load_extension("cogs.tokumei")  # tokumei.py を読み込む
     await client.load_extension("cogs.ai") # ai.pyを読み込む
     await client.load_extension("cogs.user")  # user.pyを読み込む
