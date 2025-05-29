@@ -269,58 +269,66 @@ async def on_message(message):
         return
 
 
-        # 🔒 DMから t!tokumei を受け取って匿名投稿（リンク/長文は却下）
-    if isinstance(message.channel, discord.DMChannel) and message.content.startswith("t!tokumei"):
-        anonymous_channel_id = 1376785231960346644
+@client.event
+async def on_message(message):
+    # Bot自身のメッセージは無視
+    if message.author.bot:
+        return
+
+    # DM限定 t!tokumei コマンド処理
+    if isinstance(message.channel, discord.DMChannel) and message.content.startswith("t!tokumei "):
+        content = message.content[len("t!tokumei "):].strip()
+
+        # 匿名投稿先・ログチャンネルのID
+        anon_channel_id = 1376785231960346644
         log_channel_id = 1377479769687330848
 
-        text = message.content[10:].strip()
-        if not text:
-            await message.channel.send("⚠️ メッセージが空です。`t!tokumei [メッセージ]` の形式で送ってね。")
+        # チェック① リンク検出
+        if "http://" in content or "https://" in content or "discord.gg/" in content:
+            await message.channel.send("⚠️ 匿名メッセージにリンクは使用できません。")
             return
 
-        # ✅ 却下チェック：リンク
-        has_link = any(word in text.lower() for word in ["http://", "https://", "www.", "discord.gg"])
-        if has_link:
-            await message.channel.send("⚠️ リンクが含まれているため投稿できません。")
-
-            log_channel = client.get_channel(log_channel_id)
-            if log_channel:
-                embed = discord.Embed(title="🚫 匿名DM投稿 却下", color=discord.Color.red())
-                embed.add_field(name="送信者", value=f"{message.author} (ID: {message.author.id})", inline=False)
-                embed.add_field(name="理由", value="リンクが含まれていた", inline=False)
-                embed.add_field(name="内容", value=text, inline=False)
-                await log_channel.send(embed=embed)
+        # チェック② 文字数制限
+        if len(content) > 200:
+            await message.channel.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
             return
 
-        # ✅ 却下チェック：200文字以上
-        if len(text) > 200:
-            await message.channel.send("⚠️ メッセージが長すぎます（200文字以内にしてください）。")
+        # 匿名名とアイコン（ランダム）
+        names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん"]
+        icons = [
+            "https://i.imgur.com/aeXFGjF.png",  # お好きな画像に変更可
+            "https://i.imgur.com/HK7QF0n.png",
+            "https://i.imgur.com/5Z8I1sY.png"
+        ]
+        anon_name = random.choice(names)
+        anon_icon = random.choice(icons)
 
-            log_channel = client.get_channel(log_channel_id)
-            if log_channel:
-                embed = discord.Embed(title="🚫 匿名DM投稿 却下", color=discord.Color.red())
-                embed.add_field(name="送信者", value=f"{message.author} (ID: {message.author.id})", inline=False)
-                embed.add_field(name="理由", value=f"{len(text)}文字のメッセージは長すぎる", inline=False)
-                embed.add_field(name="内容", value=text, inline=False)
-                await log_channel.send(embed=embed)
+        # 投稿先チャンネル取得
+        channel = client.get_channel(anon_channel_id)
+        if channel is None:
+            await message.channel.send("⚠️ 投稿チャンネルが見つかりません。")
             return
 
-        # 投稿とログ
-        anonymous_channel = client.get_channel(anonymous_channel_id)
-        if anonymous_channel:
-            await anonymous_channel.send(f"**匿名の誰か：**\n{text}")
+        # Webhook送信
+        try:
+            webhook = await channel.create_webhook(name=anon_name)
+            await webhook.send(content, avatar_url=anon_icon)
+            await webhook.delete()
+
+            # 成功メッセージ
             await message.channel.send("✅ 匿名メッセージを送信しました！")
-        else:
-            await message.channel.send("⚠️ 投稿先チャンネルが見つかりませんでした。")
 
-        log_channel = client.get_channel(log_channel_id)
-        if log_channel:
-            embed = discord.Embed(title="📨 匿名DMメッセージ", color=discord.Color.dark_gray())
-            embed.add_field(name="送信者", value=f"{message.author} (ID: {message.author.id})", inline=False)
-            embed.add_field(name="内容", value=text, inline=False)
-            await log_channel.send(embed=embed)
-        return
+            # ログ送信
+            log_channel = client.get_channel(log_channel_id)
+            if log_channel:
+                embed = discord.Embed(title="匿名メッセージログ", color=discord.Color.orange())
+                embed.add_field(name="送信者", value=f"{message.author}（{message.author.id}）", inline=False)
+                embed.add_field(name="内容", value=content, inline=False)
+                await log_channel.send(embed=embed)
+
+        except Exception as e:
+            await message.channel.send("⚠️ 送信中にエラーが発生しました。")
+            print(f"Webhookエラー: {e}")
             
         # t!chatgpt コマンド（API制限メッセージ）
     if message.content.startswith("t!chatgpt"):
