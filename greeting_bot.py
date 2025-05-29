@@ -16,7 +16,13 @@ intents.presences = True     # ユーザーのステータスを取得するた�
 intents.members = True       # ユーザー情報を取得するために必要！
 
 # Bot本体を作成
-client = discord.Client(intents=intents)
+from discord.ext import commands  # これをインポートのところに追加！
+
+client = commands.Bot(command_prefix="t!", intents=intents)
+
+from discord import app_commands  # これもインポートに追加！
+
+tree = app_commands.CommandTree(client)
 
 # ✅ 起動時に一度だけ記録される
 start_time = datetime.now()
