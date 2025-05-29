@@ -233,60 +233,6 @@ async def on_message(message):
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
 
-    # t!user コマンド（ユーザー情報を表示・管理者限定）
-    if message.content.startswith('t!user'):
-        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
-            parts = message.content.split()
-            target_user = message.author
-            target_member = message.guild.get_member(target_user.id)
-
-            # 引数が指定されている場合（ID または メンション対応）
-            if len(parts) == 2:
-                arg = parts[1]
-
-                # メンション形式（<@1234567890> または <@!1234567890>）をIDに変換
-                if arg.startswith("<@") and arg.endswith(">"):
-                    arg = arg.replace("<@", "").replace("!", "").replace(">", "")
-
-                try:
-                    user_id = int(arg)
-                    target_user = await client.fetch_user(user_id)
-                    target_member = message.guild.get_member(user_id)
-                except:
-                    await message.channel.send("⚠️ ユーザーが見つかりませんでした。")
-                    return
-
-            # 埋め込みメッセージを作成
-            embed = discord.Embed(
-                title=f"🧑‍💼 ユーザー情報：{target_user.name}",
-                color=discord.Color.blue()
-            )
-            embed.set_thumbnail(url=target_user.avatar.url if target_user.avatar else target_user.default_avatar.url)
-            embed.add_field(name="ユーザー名", value=target_user.name, inline=False)
-            embed.add_field(name="ユーザーID", value=target_user.id, inline=False)
-            embed.add_field(name="アカウント作成日", value=target_user.created_at.strftime('%Y-%m-%d %H:%M:%S'), inline=False)
-            try:
-                joined_date = target_member.joined_at.strftime('%Y-%m-%d %H:%M:%S') if target_member and target_member.joined_at else "不明"
-            except:
-                joined_date = "不明"
-
-            embed.add_field(
-                name="サーバー参加日",
-                value=joined_date,
-                inline=False
-            )
-
-            # コマンド実行者に送信
-            await message.channel.send(embed=embed)
-
-            # ログチャンネルにも送信
-            log_channel = client.get_channel(notify_channel_id)
-            if log_channel:
-                await log_channel.send(embed=embed)
-        else:
-            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
-        return
-
 
     # t!yamu コマンド（病み構文を一気に投稿・クールダウンあり）
     if message.content.startswith('t!yamu'):
@@ -495,6 +441,7 @@ async def setup_hook():
     await client.load_extension("cogs.admin")  # ← admin.py を読み込む
     await client.load_extension("cogs.tokumei")  # tokumei.py を読み込む
     await client.load_extension("cogs.ai") # ai.pyを読み込む
+    await client.load_extension("cogs.user")  # user.pyを読み込む
 
 # トークン未設定チェック
 if not TOKEN:
