@@ -88,57 +88,6 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-
-        # DM限定 t!tokumei コマンド処理
-    if isinstance(message.channel, discord.DMChannel) and message.content.startswith("t!tokumei "):
-        content = message.content[len("t!tokumei "):].strip()
-
-        # 匿名投稿先・ログチャンネルのID
-        anon_channel_id = 1376785231960346644
-        log_channel_id = 1377479769687330848
-
-        # チェック① リンク検出
-        if "http://" in content or "https://" in content or "discord.gg/" in content:
-            await message.channel.send("⚠️ 匿名メッセージにリンクは使用できません。")
-            return
-
-        # チェック② 文字数制限
-        if len(content) > 200:
-            await message.channel.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
-            return
-
-        # 匿名名とアイコン（アイコンは真っ白で固定）
-        names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん","DMから失礼します"]
-        anon_name = random.choice(names)
-        anon_icon = "https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"
-
-        # 投稿先チャンネル取得
-        channel = client.get_channel(anon_channel_id)
-        if channel is None:
-            await message.channel.send("⚠️ 投稿チャンネルが見つかりません。")
-            return
-
-        # Webhook送信
-        try:
-            webhook = await channel.create_webhook(name=anon_name)
-            await webhook.send(content, avatar_url=anon_icon)
-            await webhook.delete()
-
-            # 成功メッセージ
-            await message.channel.send("✅ 匿名メッセージを送信しました！")
-
-            # ログ送信
-            log_channel = client.get_channel(log_channel_id)
-            if log_channel:
-                embed = discord.Embed(title="匿名メッセージログ", color=discord.Color.orange())
-                embed.add_field(name="送信者", value=f"{message.author}（{message.author.id}）", inline=False)
-                embed.add_field(name="内容", value=content, inline=False)
-                await log_channel.send(embed=embed)
-
-        except Exception as e:
-            await message.channel.send("⚠️ 送信中にエラーが発生しました。")
-            print(f"Webhookエラー: {e}")
-
     
     # t!help コマンド（コマンド一覧を表示）
     if message.content == 't!help':
@@ -628,6 +577,7 @@ async def setup_hook():
     await client.load_extension("cogs.ping")  # ping.py を読み込む
     await client.load_extension("cogs.say")   # ← say.py を追加
     await client.load_extension("cogs.admin")  # ← admin.py を読み込む
+    await client.load_extension("cogs.tokumei")  # tokumei.py を読み込む
 
 # トークン未設定チェック
 if not TOKEN:
