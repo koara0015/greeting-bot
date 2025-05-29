@@ -260,6 +260,60 @@ async def on_message(message):
         else:
             await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
         return
+
+
+        # 🔒 DMから t!tokumei を受け取って匿名投稿（リンク/長文は却下）
+    if isinstance(message.channel, discord.DMChannel) and message.content.startswith("t!tokumei"):
+        anonymous_channel_id = 1376785231960346644
+        log_channel_id = 1377479769687330848
+
+        text = message.content[10:].strip()
+        if not text:
+            await message.channel.send("⚠️ メッセージが空です。`t!tokumei [メッセージ]` の形式で送ってね。")
+            return
+
+        # ✅ 却下チェック：リンク
+        has_link = any(word in text.lower() for word in ["http://", "https://", "www.", "discord.gg"])
+        if has_link:
+            await message.channel.send("⚠️ リンクが含まれているため投稿できません。")
+
+            log_channel = client.get_channel(log_channel_id)
+            if log_channel:
+                embed = discord.Embed(title="🚫 匿名DM投稿 却下", color=discord.Color.red())
+                embed.add_field(name="送信者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                embed.add_field(name="理由", value="リンクが含まれていた", inline=False)
+                embed.add_field(name="内容", value=text, inline=False)
+                await log_channel.send(embed=embed)
+            return
+
+        # ✅ 却下チェック：200文字以上
+        if len(text) > 200:
+            await message.channel.send("⚠️ メッセージが長すぎます（200文字以内にしてください）。")
+
+            log_channel = client.get_channel(log_channel_id)
+            if log_channel:
+                embed = discord.Embed(title="🚫 匿名DM投稿 却下", color=discord.Color.red())
+                embed.add_field(name="送信者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+                embed.add_field(name="理由", value=f"{len(text)}文字のメッセージは長すぎる", inline=False)
+                embed.add_field(name="内容", value=text, inline=False)
+                await log_channel.send(embed=embed)
+            return
+
+        # 投稿とログ
+        anonymous_channel = client.get_channel(anonymous_channel_id)
+        if anonymous_channel:
+            await anonymous_channel.send(f"**匿名の誰か：**\n{text}")
+            await message.channel.send("✅ 匿名メッセージを送信しました！")
+        else:
+            await message.channel.send("⚠️ 投稿先チャンネルが見つかりませんでした。")
+
+        log_channel = client.get_channel(log_channel_id)
+        if log_channel:
+            embed = discord.Embed(title="📨 匿名DMメッセージ", color=discord.Color.dark_gray())
+            embed.add_field(name="送信者", value=f"{message.author} (ID: {message.author.id})", inline=False)
+            embed.add_field(name="内容", value=text, inline=False)
+            await log_channel.send(embed=embed)
+        return
             
         # t!chatgpt コマンド（API制限メッセージ）
     if message.content.startswith("t!chatgpt"):
@@ -643,6 +697,52 @@ async def on_message(message):
 
         if not any(message.content.startswith(cmd) for cmd in known_prefixes):
             await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
+
+
+@tree.command(name="tokumei", description="匿名でメッセージを送信します（全員可）")
+async def tokumei_command(interaction: discord.Interaction, message: str):
+    anonymous_channel_id = 1376785231960346644
+    log_channel_id = 1377479769687330848
+
+    # ✅ 却下チェック：リンク
+    has_link = any(word in message.lower() for word in ["http://", "https://", "www.", "discord.gg"])
+    if has_link:
+        await interaction.response.send_message("⚠️ リンクが含まれているため投稿できません。", ephemeral=True)
+
+        log_channel = client.get_channel(log_channel_id)
+        if log_channel:
+            embed = discord.Embed(title="🚫 匿名スラッシュ投稿 却下", color=discord.Color.red())
+            embed.add_field(name="送信者", value=f"{interaction.user} (ID: {interaction.user.id})", inline=False)
+            embed.add_field(name="理由", value="リンクが含まれていた", inline=False)
+            embed.add_field(name="内容", value=message, inline=False)
+            await log_channel.send(embed=embed)
+        return
+
+    # ✅ 却下チェック：200文字以上
+    if len(message) > 200:
+        await interaction.response.send_message("⚠️ メッセージが長すぎます（200文字以内にしてください）。", ephemeral=True)
+
+        log_channel = client.get_channel(log_channel_id)
+        if log_channel:
+            embed = discord.Embed(title="🚫 匿名スラッシュ投稿 却下", color=discord.Color.red())
+            embed.add_field(name="送信者", value=f"{interaction.user} (ID: {interaction.user.id})", inline=False)
+            embed.add_field(name="理由", value=f"{len(message)}文字のメッセージは長すぎる", inline=False)
+            embed.add_field(name="内容", value=message, inline=False)
+            await log_channel.send(embed=embed)
+        return
+
+    # 通常投稿
+    anonymous_channel = client.get_channel(anonymous_channel_id)
+    if anonymous_channel:
+        await anonymous_channel.send(f"**匿名の誰か：**\n{message}")
+        await interaction.response.send_message("✅ 匿名メッセージを送信しました！", ephemeral=True)
+
+    log_channel = client.get_channel(log_channel_id)
+    if log_channel:
+        embed = discord.Embed(title="📨 匿名スラッシュ投稿", color=discord.Color.dark_gray())
+        embed.add_field(name="送信者", value=f"{interaction.user} (ID: {interaction.user.id})", inline=False)
+        embed.add_field(name="内容", value=message, inline=False)
+        await log_channel.send(embed=embed)
 
 # Botの起動
 client.run(TOKEN)
