@@ -88,37 +88,6 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    
-    # t!help コマンド（コマンド一覧を表示）
-    if message.content == 't!help':
-        if message.author.id in moderator_ids or message.author.guild_permissions.administrator:
-            embed = discord.Embed(
-                title="🤖 コマンド一覧",
-                description="このBotで使えるコマンド一覧です！",
-                color=discord.Color.green()
-            )
-            embed.add_field(name="🟢 t!help", value="コマンド一覧を表示します（サーバー管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!shutdown", value="Botを終了します（オーナー限定）", inline=False)
-            embed.add_field(name="🟢 t!restart", value="Botを再起動します（オーナー限定）", inline=False)
-            embed.add_field(name="🟢 t!say [チャンネルID] [メッセージ]", value="このボットに指定した言葉を言わせます（サーバー管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!ping", value="Botの応答速度を表示します（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!omikuji", value="1日1回限定のおみくじをやります（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!yamu [チャンネルID]", value="みっちゃんが過去に打った病み構文を一気に流します（モデレーター以上限定）", inline=False)
-            embed.add_field(name="🟢 t!ai [質問]", value="aiが質問に対して適当に返してくれます（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!user [ユーザーID/メンション]", value="ユーザー情報を表示してくれます（サーバー管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!stats", value="このボットのステータスを表示します（サーバー管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!avatar [メンション or ID]", value="ユーザーのアバター（アイコン）を表示します（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!serverinfo", value="サーバーの詳細を表示します（サーバー管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!admin", value="現在のオーナー・管理者・モデレーター・VIPの一覧を表示します（モデレーター以上限定）", inline=False)
-            embed.add_field(name="🟢 t!dm [メンバーID/メンション] [メッセージ]", value="メンバーにDMを送ります（ボット管理者限定）", inline=False)
-            embed.add_field(name="🟢 t!tokumei [メッセージ]", value="みっちゃん初号機へのDMのみで使用可（誰でも可）", inline=False)
-            embed.add_field(name="🟢 t!mittyan", value="❌❌❌❌（VIP限定）", inline=False)
-            embed.add_field(name="🔴 t!chatgpt [質問]", value="現在使用不可", inline=False)
-            await message.channel.send(embed=embed)
-        else:
-            await message.channel.send("⚠️ モデレーター以上の権限が必要です。")
-        return
-
     # サーバー上で t!tokumei が使われたときの注意メッセージ
     if (
         not isinstance(message.channel, discord.DMChannel)
@@ -203,6 +172,7 @@ async def setup_hook():
     await client.load_extension("cogs.chatgpt") # chatgpt.pyを読み込む
     await client.load_extension("cogs.mittyan") # mittyan.pyを読み込む
     await client.load_extension("cogs.omikuji") # omikuji.pyを読み込む
+    await client.load_extension("cogs.help")  # help.py を読み込む
 
 # トークン未設定チェック
 if not TOKEN:
