@@ -83,10 +83,9 @@ async def on_message(message):
     # Bot自身や他のBotのメッセージは無視
     if message.author.bot:
         return
-
 # ✅ DMでのメッセージ処理（t!tokumei だけ許可）
-if isinstance(message.channel, discord.DMChannel):
-    if message.content.startswith("t!tokumei"):
+    if isinstance(message.channel, discord.DMChannel):
+        if message.content.startswith("t!tokumei"):
         pass  # そのままCogへ通す
     else:
         return  # その他のDMメッセージは無視
