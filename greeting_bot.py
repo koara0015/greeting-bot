@@ -81,28 +81,6 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # 存在しないコマンドに反応する処理
-    if message.content.startswith("t!"):
-        known_prefixes = [
-            't!help',        # ヘルプ表示
-            't!say',         # 指定チャンネルにメッセージ送信
-            't!shutdown',    # Bot終了（owner限定）
-            't!restart',     # Bot再起動（owner限定）
-            't!omikuji',     # おみくじ（1日1回制限あり）
-            't!yamu',        # 病み構文連投（管理者限定）
-            't!ai',          # なんちゃってAI返信
-            't!user',        # ユーザー情報表示
-            't!stats',       # 使用状況表示
-            't!mittyan',     # みっちゃん生存確認（自動通知）
-            't!serverinfo',  # サーバー情報表示
-            't!admin',       # 管理者向けの設定確認
-            't!dm',          # ユーザーへのDM送信（管理者限定）
-            't!chatgpt',     # OpenAIにメッセージを送る（簡易AI）
-            't!tokumei',     # 匿名投稿（Webhook）
-            't!avatar',      # ユーザーのアイコン表示
-            't!ping'         # 応答速度を表示
-        ]
-
         # "t!" だけのメッセージは無視
         if message.content.strip() == "t!":
             return
@@ -132,6 +110,7 @@ async def setup_hook():
     await client.load_extension("cogs.help")  # ← help.pyを読み込む
     await client.load_extension("cogs.autoresponder") # 自動返信
     await client.load_extension("cogs.reaction")  # ← reaction.py を読み込む
+    await client.load_extension("cogs.unknown_command")  # 存在しないコマンド
 
 # トークン未設定チェック
 if not TOKEN:
