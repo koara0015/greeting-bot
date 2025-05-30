@@ -88,13 +88,6 @@ async def on_message(message):
     if isinstance(message.channel, discord.DMChannel):
         return
 
-    # 👍 特定のチャンネルにメッセージがあれば自動でリアクション
-    if message.channel.id == react_channel_id:
-        try:
-            await message.add_reaction("👍")
-        except Exception as e:
-            print(f"リアクション失敗: {e}")
-
     # ✅ t!shutdown コマンド（オーナー専用）
     if message.content.startswith('t!shutdown'):
         if message.author.id == owner_id:
