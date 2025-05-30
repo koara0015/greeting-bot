@@ -59,13 +59,6 @@ async def on_message(message):
     notify_channel_id = 1371322394719031396  # ログチャンネルのID
     react_channel_id = 1125349326269452309  # 👍リアクションを付けるチャンネルのID
 
-    # 特定のチャンネルでメッセージに👍リアクションを付ける
-    if message.channel.id == react_channel_id:
-        try:
-            await message.add_reaction("👍")
-        except Exception as e:
-            print(f"リアクション失敗: {e}")
-
     # t!shutdown コマンド（Botを終了）
     if message.content.startswith('t!shutdown'):
         if message.author.id == owner_id:
@@ -138,6 +131,7 @@ async def setup_hook():
     await client.load_extension("cogs.omikuji") # omikuji.pyを読み込む
     await client.load_extension("cogs.help")  # ← help.pyを読み込む
     await client.load_extension("cogs.autoresponder") # 自動返信
+    await client.load_extension("cogs.reaction")  # ← reaction.py を読み込む
 
 # トークン未設定チェック
 if not TOKEN:
