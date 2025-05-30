@@ -88,33 +88,6 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-
-    # 雑談の自動返信（コマンドじゃないメッセージだけ）
-    if not message.content.startswith("t!") and message.content.strip():
-        text = message.content.lower()
-
-        if "おはよ" in text:
-            responses = [
-                'もう昼だよヽ(`Д´)ﾉﾌﾟﾝﾌﾟﾝ',
-                '学校行けよ',
-                '寝坊してない？( ˘⁠ω˘ )',
-                '早起き過ぎ！？！？！？！',
-                'おっそ',
-            ]
-            await message.channel.send(random.choice(responses))
-
-        elif "おやすみ" in text:
-            responses = [
-                'おやすみ',
-                'いい夢見てね！',
-                '今日もnukeされずに済んだね！',
-                'おやすみのnukeは？',
-                'おつかれさま、ゆっくり休んでね〜',
-                'おやすみ〜',
-                'もう起きてこなくていいよ',
-            ]
-            await message.channel.send(random.choice(responses))
-
     # 存在しないコマンドに反応する処理
     if message.content.startswith("t!"):
         known_prefixes = [
@@ -164,6 +137,7 @@ async def setup_hook():
     await client.load_extension("cogs.mittyan") # mittyan.pyを読み込む
     await client.load_extension("cogs.omikuji") # omikuji.pyを読み込む
     await client.load_extension("cogs.help")  # ← help.pyを読み込む
+    await client.load_extension("cogs.autoresponder") # 自動返信
 
 # トークン未設定チェック
 if not TOKEN:
