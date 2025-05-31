@@ -114,6 +114,20 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
+    # ✅ 存在しないコマンドのチェック（完全一致）
+    if message.content.startswith("t!"):
+        command_name = message.content.split()[0]  # 例: t!help aaa → t!help
+        known_prefixes = [
+            't!help', 't!say', 't!shutdown', 't!restart', 't!omikuji',
+            't!yamu', 't!ai', 't!user', 't!stats', 't!mittyan', 't!serverinfo',
+            't!admin', 't!dm', 't!chatgpt', 't!tokumei', 't!avatar', 't!ping'
+        ]
+        if command_name == "t!":
+            return
+        if command_name not in known_prefixes:
+            await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
+            return
+
     # ✅ その他のメッセージをCogに渡す（コマンド処理へ）
     await client.process_commands(message)
 
