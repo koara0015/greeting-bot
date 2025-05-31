@@ -60,10 +60,13 @@ async def on_ready():
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
         await ctx.send("⚠️ 引数が足りません。コマンドの使い方を確認してください。")
+    elif isinstance(error, commands.CommandNotFound):
+        return  # 存在しないコマンドは unknown_command.py に任せる
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("🛑 必要な権限がありません。")
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンドの実行中にエラーが発生しました。")
+        # エラー内容を通知チャンネルに送信
         notify_channel = client.get_channel(notify_channel_id)
         if notify_channel:
             await notify_channel.send(f"🔴 コマンドエラー: `{error.original}`")
@@ -84,13 +87,13 @@ async def on_message(message):
 
     # ✅ DMでの処理：t!tokumei だけは許可、他は無視
     if isinstance(message.channel, discord.DMChannel):
-        if message.content.strip().split()[0] == "t!tokumei":
+        if message.content.startswith("t!tokumei"):
             pass  # Cogで処理するため通過
         else:
             return  # その他のDMメッセージは無視
 
     # ✅ t!shutdown（オーナー専用）
-    if message.content.strip().split()[0] == "t!shutdown":
+    if message.content.strip() == "t!shutdown":
         if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
             if channel:
@@ -101,7 +104,7 @@ async def on_message(message):
         return
 
     # ✅ t!restart（オーナー専用）
-    if message.content.strip().split()[0] == "t!restart":
+    if message.content.strip() == "t!restart":
         if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
             if channel:
@@ -111,19 +114,24 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # ✅ 存在しないコマンドのチェック（コマンド名が一致するか）
+    # ✅ 存在しないコマンドのチェック（完全一致）
     if message.content.startswith("t!"):
-        command_name = message.content.strip().split()[0]  # 最初の単語だけ取り出す
+        command_name = message.content.split()[0]  # 例: t!help aaa → t!help
         known_prefixes = [
             't!help', 't!say', 't!shutdown', 't!restart', 't!omikuji',
             't!yamu', 't!ai', 't!user', 't!stats', 't!mittyan', 't!serverinfo',
             't!admin', 't!dm', 't!chatgpt', 't!tokumei', 't!avatar', 't!ping'
         ]
+        if command_name == "t!":
+            return
         if command_name not in known_prefixes:
             await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
             return
+        if message.content != command_name:
+            await message.channel.send("❌ 正しい使い方でコマンドを入力してください。[t!help]で確認できます。")
+            return
 
-    # ✅ Cog側に処理を渡す（正式コマンドのみ）
+    # ✅ その他のメッセージをCogに渡す（コマンド処理へ）
     await client.process_commands(message)
 
 # ✅ Cogの読み込み（各機能を分離して管理）
@@ -145,7 +153,7 @@ async def setup_hook():
     await client.load_extension("cogs.help")
     await client.load_extension("cogs.autoresponder")
     await client.load_extension("cogs.reaction")
-    await client.load_extension("cogs.unknown_command")
+    await client.load_extension("cogs.unknown_command")  # 存在しないコマンドに対応
 
 # ✅ トークン未設定時のエラーチェック
 if not TOKEN:
