@@ -1,51 +1,48 @@
 # ✅ 必要なライブラリをインポート
-import discord                    # Discordの機能を使うため
-import os                         # 環境変数からトークンを取得するため
-import random                     # ランダム処理（例：おみくじなど）に使う
-import asyncio                    # 非同期処理に必要（sleepなど）
-from datetime import datetime     # 日時処理（例：起動時間）
-from discord.ext import commands  # Botコマンドを使うための拡張
-from discord import app_commands  # スラッシュコマンド用
+import discord
+import os
+import random
+import asyncio
+from datetime import datetime
+from discord.ext import commands
+from discord import app_commands
 
 # ✅ トークンを環境変数から取得（セキュリティのため）
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # ✅ 必要な意図（intents）を設定
 intents = discord.Intents.default()
-intents.message_content = True  # メッセージ内容を扱えるようにする
-intents.presences = True        # ステータス取得用
-intents.members = True          # メンバー情報取得用
+intents.message_content = True
+intents.presences = True
+intents.members = True
 
-# ✅ Bot本体を作成
+# ✅ Bot本体を作成（コマンドプレフィックスは「t!」、ヘルプは自作のためNone）
 client = commands.Bot(command_prefix="t!", intents=intents, help_command=None)
-tree = client.tree  # スラッシュコマンド登録用
+tree = client.tree
 
-# ✅ 起動時刻の記録（例：稼働時間計算などに使える）
+# ✅ 起動時刻の記録
 start_time = datetime.now()
 
-# ✅ おみくじの使用履歴（1日1回制限の管理）
+# ✅ 使用履歴やクールダウンの管理辞書
 omikuji_usage = {}
-
-# ✅ クールダウン管理（例：t!yamu制限）
 yamu_cooldowns = {}
 
-# ✅ 各種ID設定
-notify_channel_id = 1371322394719031396  # 起動・ログ通知用チャンネル
-react_channel_id = 1125349326269452309   # 👍リアクション対象チャンネル
-owner_id = 1150048383524941826           # BotオーナーID
+# ✅ 各種ID
+notify_channel_id = 1371322394719031396
+react_channel_id = 1125349326269452309
+owner_id = 1150048383524941826
 
-# 管理者／モデレーター／VIPのIDリスト（将来の権限管理にも活用可能）
 admin_ids = [1150048383524941826, 1095693259403173949]
 moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563, 841603812548411412, 1138810816905367633]
 vip_ids = [1150048383524941826]
 
-# ✅ Bot起動時に実行される処理
+# ✅ Bot起動時の処理
 @client.event
 async def on_ready():
-    await tree.sync()  # スラッシュコマンドを同期
+    await tree.sync()
     print(f'ログインしました：{client.user}')
 
-    # 起動通知をチャンネルに送信
+    # 起動通知の送信
     channel = client.get_channel(notify_channel_id)
     if channel:
         try:
@@ -55,7 +52,7 @@ async def on_ready():
     else:
         print("⚠️ 通知チャンネルが見つかりません")
 
-# ✅ コマンド実行時のエラー処理（ユーザーへの通知とログ記録）
+# ✅ コマンド実行時のエラー処理（CommandNotFoundはunknown_commandで処理）
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
@@ -66,7 +63,6 @@ async def on_command_error(ctx, error):
         await ctx.send("🛑 必要な権限がありません。")
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンドの実行中にエラーが発生しました。")
-        # エラー内容を通知チャンネルに送信
         notify_channel = client.get_channel(notify_channel_id)
         if notify_channel:
             await notify_channel.send(f"🔴 コマンドエラー: `{error.original}`")
@@ -78,21 +74,21 @@ async def on_command_error(ctx, error):
             await notify_channel.send(f"⚠️ 不明なエラー: `{error}`")
         print(f"Unhandled error: {error}")
 
-# ✅ メッセージ受信時の処理（手動コマンドとDMのハンドリング）
+# ✅ メッセージ受信時の処理（DMと特定コマンド処理）
 @client.event
 async def on_message(message):
     # Bot自身のメッセージは無視
     if message.author.bot:
         return
 
-    # ✅ DMでの処理：t!tokumei だけは許可、他は無視
+    # ✅ DMで「t!tokumei」のみ許可
     if isinstance(message.channel, discord.DMChannel):
         if message.content.startswith("t!tokumei"):
-            pass  # Cogで処理するため通過
+            pass  # Cogに処理を渡す
         else:
             return  # その他のDMメッセージは無視
 
-    # ✅ t!shutdown（オーナー専用）
+    # ✅ t!shutdown（完全一致のみ実行）
     if message.content.strip() == "t!shutdown":
         if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
@@ -103,7 +99,7 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # ✅ t!restart（オーナー専用）
+    # ✅ t!restart（完全一致のみ実行）
     if message.content.strip() == "t!restart":
         if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
@@ -114,27 +110,10 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # ✅ 存在しないコマンドのチェック（完全一致）
-    if message.content.startswith("t!"):
-        command_name = message.content.split()[0]  # 例: t!help aaa → t!help
-        known_prefixes = [
-            't!help', 't!say', 't!shutdown', 't!restart', 't!omikuji',
-            't!yamu', 't!ai', 't!user', 't!stats', 't!mittyan', 't!serverinfo',
-            't!admin', 't!dm', 't!chatgpt', 't!tokumei', 't!avatar', 't!ping'
-        ]
-        if command_name == "t!":
-            return
-        if command_name not in known_prefixes:
-            await message.channel.send("❌ そんなコマンドはありません。[t!help]で確認してください。")
-            return
-        if message.content != command_name:
-            await message.channel.send("❌ 正しい使い方でコマンドを入力してください。[t!help]で確認できます。")
-            return
-
-    # ✅ その他のメッセージをCogに渡す（コマンド処理へ）
+    # ✅ その他のメッセージをコマンドとして処理
     await client.process_commands(message)
 
-# ✅ Cogの読み込み（各機能を分離して管理）
+# ✅ Cogの読み込み（機能ごとに整理）
 @client.event
 async def setup_hook():
     await client.load_extension("cogs.ping")
@@ -153,7 +132,7 @@ async def setup_hook():
     await client.load_extension("cogs.help")
     await client.load_extension("cogs.autoresponder")
     await client.load_extension("cogs.reaction")
-    await client.load_extension("cogs.unknown_command")  # 存在しないコマンドに対応
+    await client.load_extension("cogs.unknown_command")  # 存在しないコマンドの処理を任せる
 
 # ✅ トークン未設定時のエラーチェック
 if not TOKEN:
