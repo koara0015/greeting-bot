@@ -36,13 +36,32 @@ admin_ids = [1150048383524941826, 1095693259403173949]
 moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563, 841603812548411412]
 vip_ids = [1150048383524941826]
 
+# ✅ Cogのリスト（再起動時にも使う）
+cogs_list = [
+    "cogs.ping",
+    "cogs.say",
+    "cogs.dm",
+    "cogs.tokumei",
+    "cogs.ai",
+    "cogs.user",
+    "cogs.admin",
+    "cogs.yamu",
+    "cogs.serverinfo",
+    "cogs.stats",
+    "cogs.chatgpt",
+    "cogs.mittyan",
+    "cogs.omikuji",
+    "cogs.help",
+    "cogs.autoresponder",
+    "cogs.reaction",
+    "cogs.unknown_command"
+]
+
 # ✅ Bot起動時の処理
 @client.event
 async def on_ready():
     await tree.sync()
     print(f'ログインしました：{client.user}')
-
-    # 起動通知の送信
     channel = client.get_channel(notify_channel_id)
     if channel:
         try:
@@ -52,43 +71,40 @@ async def on_ready():
     else:
         print("⚠️ 通知チャンネルが見つかりません")
 
-# ✅ コマンド実行時のエラー処理（CommandNotFoundはunknown_commandで処理）
+# ✅ エラー処理
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send("⚠️ 引数が足りません。コマンドの使い方を確認してください。")
+        await ctx.send("⚠️ 引数が足りません。")
     elif isinstance(error, commands.CommandNotFound):
-        return  # 存在しないコマンドは unknown_command.py に任せる
+        return
     elif isinstance(error, commands.MissingPermissions):
-        await ctx.send("🛑 必要な権限がありません。")
+        await ctx.send("🛑 権限がありません。")
     elif isinstance(error, commands.CommandInvokeError):
-        await ctx.send("⚠️ コマンドの実行中にエラーが発生しました。")
-        notify_channel = client.get_channel(notify_channel_id)
-        if notify_channel:
-            await notify_channel.send(f"🔴 コマンドエラー: `{error.original}`")
-        print(f"Command error: {error.original}")
+        await ctx.send("⚠️ コマンド実行中にエラーが発生しました。")
+        channel = client.get_channel(notify_channel_id)
+        if channel:
+            await channel.send(f"🔴 コマンドエラー: `{error.original}`")
     else:
-        await ctx.send("⚠️ 予期しないエラーが発生しました。")
-        notify_channel = client.get_channel(notify_channel_id)
-        if notify_channel:
-            await notify_channel.send(f"⚠️ 不明なエラー: `{error}`")
-        print(f"Unhandled error: {error}")
+        await ctx.send("⚠️ 不明なエラーが発生しました。")
+        channel = client.get_channel(notify_channel_id)
+        if channel:
+            await channel.send(f"⚠️ 不明なエラー: `{error}`")
 
-# ✅ メッセージ受信時の処理（DMと特定コマンド処理）
+# ✅ メッセージ受信時の処理
 @client.event
 async def on_message(message):
-    # Bot自身のメッセージは無視
     if message.author.bot:
         return
 
-    # ✅ DMで「t!tokumei」のみ許可（他のDMは無視）
+    # ✅ DMでの処理
     if isinstance(message.channel, discord.DMChannel):
         if message.content.startswith("t!tokumei"):
-            pass  # Cogに処理を渡す
+            pass
         else:
             return
 
-    # ✅ t!shutdown（完全一致のみ実行）
+    # ✅ シャットダウン処理（オーナー専用）
     if message.content.strip() == "t!shutdown":
         if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
@@ -99,45 +115,43 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # ✅ t!restart（完全一致のみ実行）
+    # ✅ リスタート処理（Cogを再読み込み）
     if message.content.strip() == "t!restart":
         if message.author.id == owner_id:
+            success = []
+            failed = []
+
+            for cog in cogs_list:
+                try:
+                    await client.unload_extension(cog)
+                    await client.load_extension(cog)
+                    success.append(cog)
+                except Exception as e:
+                    failed.append(f"{cog} → {e}")
+
+            msg = f"🔁 Cogの再読み込みが完了しました。\n✅ 成功: {len(success)} 件\n❌ 失敗: {len(failed)} 件"
+            await message.channel.send(msg)
+
             channel = client.get_channel(notify_channel_id)
             if channel:
-                await channel.send("再起動をしました")
-            await client.close()
+                await channel.send(msg)
+            return
         else:
             await message.channel.send("🛑 オーナー専用コマンドです。")
-        return
+            return
 
-    # ✅ その他のメッセージをコマンドとして処理（Cogに渡す）
     await client.process_commands(message)
 
-# ✅ Cogの読み込み（機能ごとに整理）
+# ✅ 最初のCog読み込み処理
 @client.event
 async def setup_hook():
-    await client.load_extension("cogs.ping")
-    await client.load_extension("cogs.say")
-    await client.load_extension("cogs.dm")
-    await client.load_extension("cogs.tokumei")
-    await client.load_extension("cogs.ai")
-    await client.load_extension("cogs.user")
-    await client.load_extension("cogs.admin")
-    await client.load_extension("cogs.yamu")
-    await client.load_extension("cogs.serverinfo")
-    await client.load_extension("cogs.stats")
-    await client.load_extension("cogs.chatgpt")
-    await client.load_extension("cogs.mittyan")
-    await client.load_extension("cogs.omikuji")
-    await client.load_extension("cogs.help")
-    await client.load_extension("cogs.autoresponder")
-    await client.load_extension("cogs.reaction")
-    await client.load_extension("cogs.unknown_command")  # 存在しないコマンドの処理を任せる
+    for cog in cogs_list:
+        await client.load_extension(cog)
 
-# ✅ トークン未設定時のエラーチェック
+# ✅ トークン未設定チェック
 if not TOKEN:
     print("❌ エラー: DISCORD_TOKEN が設定されていません。")
     exit()
 
-# ✅ Botを起動！
+# ✅ Bot起動！
 client.run(TOKEN)
