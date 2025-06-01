@@ -81,12 +81,12 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # ✅ DMで「t!tokumei」のみ許可
+    # ✅ DMで「t!tokumei」のみ許可（他のDMは無視）
     if isinstance(message.channel, discord.DMChannel):
         if message.content.startswith("t!tokumei"):
             pass  # Cogに処理を渡す
         else:
-            return  # その他のDMメッセージは無視
+            return
 
     # ✅ t!shutdown（完全一致のみ実行）
     if message.content.strip() == "t!shutdown":
@@ -110,7 +110,7 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # ✅ その他のメッセージをコマンドとして処理
+    # ✅ その他のメッセージをコマンドとして処理（Cogに渡す）
     await client.process_commands(message)
 
 # ✅ Cogの読み込み（機能ごとに整理）
