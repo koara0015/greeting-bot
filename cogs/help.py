@@ -7,9 +7,8 @@ class Help(commands.Cog):
 
     @commands.command(name="help")
     async def help_command(self, ctx):
-        # ✅ 修正: 完全一致でなければエラーを返す
+        # ✅ メッセージが完全に "t!help" でない場合は何もせず終了（無反応）
         if ctx.message.content.strip() != "t!help":
-            await ctx.send("❌ 正しい使い方でコマンドを入力してください。[t!help]で確認できます。")
             return
 
         # ✅ モデレーター以上のID一覧
@@ -21,12 +20,12 @@ class Help(commands.Cog):
             1138810816905367633
         ]
 
-        # ✅ 権限チェック（IDまたはDiscord管理者権限を持っていないと使えない）
+        # ✅ 権限チェック（IDまたはDiscordの管理者権限が必要）
         if ctx.author.id not in moderator_ids and not ctx.author.guild_permissions.administrator:
             await ctx.send("⚠️ モデレーター以上の権限が必要です。")
             return
 
-        # ✅ コマンド一覧をEmbedで表示
+        # ✅ Embedでコマンド一覧を表示
         embed = discord.Embed(
             title="🤖 コマンド一覧",
             description="このBotで使えるコマンド一覧です！",
