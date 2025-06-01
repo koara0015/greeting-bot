@@ -8,6 +8,12 @@ class ServerInfo(commands.Cog):
     @commands.command(name="serverinfo")
     async def serverinfo_command(self, ctx):
         """サーバー情報を表示します（モデレーター以上限定）"""
+
+        # ✅ 入力が "t!serverinfo" 以外（余計な引数があるなど）の場合、エラーを出して終了
+        if ctx.message.content.strip() != "t!serverinfo":
+            await ctx.send("❌ 正しい使い方でコマンドを入力してください。[t!help]で確認できます。")
+            return
+
         moderator_ids = [
             1150048383524941826,  # オーナー
             1095693259403173949,  # 管理者
@@ -17,10 +23,12 @@ class ServerInfo(commands.Cog):
         ]
         notify_channel_id = 1371322394719031396  # ログ送信用
 
+        # ✅ 権限チェック：モデレーター以上でなければ拒否
         if ctx.author.id not in moderator_ids and not ctx.author.guild_permissions.administrator:
             await ctx.send("⚠️ モデレーター以上の権限が必要です。")
             return
 
+        # ✅ サーバー情報の取得
         guild = ctx.guild
         owner_user = guild.owner
         total_members = guild.member_count
@@ -31,6 +39,7 @@ class ServerInfo(commands.Cog):
         bot_owner_id = 1150048383524941826
         is_owner_in_server = guild.get_member(bot_owner_id) is not None
 
+        # ✅ 埋め込みメッセージの作成
         embed = discord.Embed(
             title=f"📊 サーバー情報：{guild.name}",
             color=discord.Color.teal()
@@ -46,12 +55,14 @@ class ServerInfo(commands.Cog):
         embed.add_field(name="みっちゃんBot導入日", value=bot_joined_at, inline=False)
         embed.add_field(name="オーナー参加中？", value="✅ はい" if is_owner_in_server else "❌ いいえ", inline=False)
 
+        # ✅ サーバーにメッセージを送信
         await ctx.send(embed=embed)
 
-        # ログ送信
+        # ✅ ログチャンネルに送信
         log_channel = self.bot.get_channel(notify_channel_id)
         if log_channel:
             await log_channel.send(embed=embed)
 
+# ✅ BotにCogを登録
 async def setup(bot):
     await bot.add_cog(ServerInfo(bot))
