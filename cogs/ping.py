@@ -7,15 +7,14 @@ class PingCog(commands.Cog):
 
     @commands.command(name="ping")
     async def ping(self, ctx):
-        # ✅ 修正：完全一致以外はエラーメッセージを返すようにする
+        # ✅ コマンドが完全一致 "t!ping" でない場合は無視（エラーメッセージなし）
         if ctx.message.content.strip() != "t!ping":
-            await ctx.send("❌ 正しい使い方でコマンドを入力してください。[t!help]で確認できます。")
             return
 
-        # ✅ Botの遅延時間（応答速度）をミリ秒単位で取得
+        # ✅ レイテンシ計測（ms単位に変換）
         latency = round(self.bot.latency * 1000)
 
-        # ✅ 埋め込みメッセージを作成して送信
+        # ✅ 応答速度を表示するEmbed作成
         embed = discord.Embed(
             title="🏓 Pong!",
             description=f"Botの応答速度は `{latency}ms` です。",
@@ -23,6 +22,6 @@ class PingCog(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-# ✅ Bot起動時にこのCogを読み込むように設定
+# ✅ CogとしてBotに登録
 async def setup(bot):
     await bot.add_cog(PingCog(bot))
