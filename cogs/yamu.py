@@ -1,31 +1,31 @@
+# ✅ 必要なライブラリをインポート
 import discord
 from discord.ext import commands
 import asyncio
 from datetime import datetime
 
+# ✅ Yamuクラス（Cogとして定義）
 class Yamu(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.cooldowns = {}  # クールダウン記録
+        self.cooldowns = {}  # 各ユーザーのクールダウン時間を記録
 
+    # ✅ t!yamu コマンドを定義
     @commands.command(name="yamu")
     async def yamu_command(self, ctx, channel_arg: str = None):
         """モデレーター専用：病み構文を連投します"""
-        moderator_ids = [
-            1150048383524941826, 1095693259403173949,
-            1354645428095680563, 841603812548411412, 1138810816905367633
-        ]
-        notify_channel_id = 1371322394719031396
 
-        if ctx.author.id not in moderator_ids:
+        # ✅ モデレーター以上の権限があるかチェック
+        if ctx.author.id not in self.bot.moderator_ids and not ctx.author.guild_permissions.administrator:
             await ctx.send("⚠️ モデレーター以上の権限が必要です。")
             return
 
+        # ✅ 引数（チャンネル指定）が無い場合は使い方を表示
         if not channel_arg:
             await ctx.send("使い方：t!yamu [チャンネルID または メンション]")
             return
 
-        # メンション形式（<#1234567890>）にも対応
+        # ✅ メンション形式（<#1234567890>）からIDを抽出
         if channel_arg.startswith("<#") and channel_arg.endswith(">"):
             channel_arg = channel_arg.replace("<#", "").replace(">", "")
 
@@ -39,7 +39,7 @@ class Yamu(commands.Cog):
             await ctx.send("⚠️ チャンネルIDが不正です。")
             return
 
-        # クールダウンチェック（15分）
+        # ✅ クールダウン（15分）チェック
         now = datetime.now()
         user_id = ctx.author.id
         last_used = self.cooldowns.get(user_id)
@@ -53,9 +53,10 @@ class Yamu(commands.Cog):
                 await ctx.send(f"⚠️ クールダウン中です。あと {minutes} 分 {seconds} 秒お待ちください。")
                 return
 
+        # ✅ クールダウン記録更新
         self.cooldowns[user_id] = now
 
-        # 病み構文リスト（省略せず全て含めています）
+        # ✅ 送信する病み構文リスト
         lines = [
             "こっちは楽しくディスコードやろうとしてるのに全部それが裏目に出て",
             "嫌がられたり嫌われたりして",
@@ -89,15 +90,16 @@ class Yamu(commands.Cog):
             "僕はもうどうしていいのかわからない"
         ]
 
-        # 一行ずつ投稿（0.1秒ごと）
+        # ✅ 一行ずつ送信（0.1秒おき）
         for line in lines:
             await target_channel.send(line)
             await asyncio.sleep(0.1)
 
-        # ログ送信
-        log_channel = self.bot.get_channel(notify_channel_id)
+        # ✅ 投稿ログを通知チャンネルに送信
+        log_channel = self.bot.get_channel(1371322394719031396)  # 通知チャンネルID（固定）
         if log_channel:
             await log_channel.send(f"病み構文を『{target_channel.name}』に投稿しました")
 
+# ✅ Cogとして登録
 async def setup(bot):
     await bot.add_cog(Yamu(bot))
