@@ -4,6 +4,7 @@ import os
 import random
 import asyncio
 import logging  # ← loggingを使用して情報を出力
+import json      # ← roles.jsonを読み込むために追加
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
@@ -35,13 +36,17 @@ start_time = datetime.now()
 omikuji_usage = {}
 yamu_cooldowns = {}
 
-# ✅ ID設定
+# ✅ ID設定（roles.jsonから読み込み）
+with open("roles.json", "r", encoding="utf-8") as f:
+    roles = json.load(f)
+
+owner_ids = roles["owner"]
+admin_ids = roles["admin"]
+moderator_ids = roles["moderator"]
+vip_ids = roles["vip"]
+
 notify_channel_id = 1371322394719031396
 react_channel_id = 1125349326269452309
-owner_id = 1150048383524941826
-admin_ids = [1150048383524941826, 1095693259403173949]
-moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563, 841603812548411412]
-vip_ids = [1150048383524941826]
 
 # ✅ Bot起動時の処理
 @client.event
@@ -94,7 +99,7 @@ async def on_message(message):
 
     # シャットダウン処理
     if message.content.strip() == "t!shutdown":
-        if message.author.id == owner_id:
+        if message.author.id in owner_ids:
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send("シャットダウンしました")
@@ -106,7 +111,7 @@ async def on_message(message):
 
     # 再起動処理（Cogを再読み込み）
     if message.content.strip() == "t!restart":
-        if message.author.id == owner_id:
+        if message.author.id in owner_ids:
             success = []
             failed = []
 
