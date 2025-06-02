@@ -4,7 +4,7 @@ import os
 import random
 import asyncio
 import logging  # ← loggingを使用して情報を出力
-import json  # ← ids.json 読み込み用
+import json  # ← config.json / ids.json 読み込み用
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
@@ -25,9 +25,13 @@ intents.message_content = True
 intents.presences = True
 intents.members = True
 
-# ✅ Bot本体を作成（接頭辞はt!）
-client = commands.Bot(command_prefix="t!", intents=intents, help_command=None)
+# ✅ Bot本体を作成（接頭辞は config.json から取得）
+with open("config.json", "r", encoding="utf-8") as f:
+    config = json.load(f)
+
+client = commands.Bot(command_prefix=config["command_prefix"], intents=intents, help_command=None)
 tree = client.tree
+client.config = config  # ✅ Botインスタンスに設定を保持
 
 # ✅ 起動時間記録
 start_time = datetime.now()
@@ -35,10 +39,6 @@ start_time = datetime.now()
 # ✅ 使用履歴などの辞書
 omikuji_usage = {}
 yamu_cooldowns = {}
-
-# ✅ 固定のチャンネルID
-notify_channel_id = 1371322394719031396
-react_channel_id = 1125349326269452309
 
 # ✅ ids.jsonを読み込んで各種IDをセット
 with open("ids.json", "r", encoding="utf-8") as f:
@@ -54,7 +54,7 @@ client.vip_ids = ids_data.get("vip", [])
 async def on_ready():
     await tree.sync()
     logging.info(f'ログインしました：{client.user}')
-    channel = client.get_channel(notify_channel_id)
+    channel = client.get_channel(client.config["notify_channel_id"])
     if channel:
         try:
             await channel.send("起動しました")
@@ -75,13 +75,13 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンド実行中にエラーが発生しました。")
         logging.error(f"Command error: {error.original}")
-        channel = client.get_channel(notify_channel_id)
+        channel = client.get_channel(client.config["notify_channel_id"])
         if channel:
             await channel.send(f"🔴 コマンドエラー: `{error.original}`")
     else:
         await ctx.send("⚠️ 不明なエラーが発生しました。")
         logging.error(f"Unhandled error: {error}")
-        channel = client.get_channel(notify_channel_id)
+        channel = client.get_channel(client.config["notify_channel_id"])
         if channel:
             await channel.send(f"⚠️ 不明なエラー: `{error}`")
 
@@ -101,7 +101,7 @@ async def on_message(message):
     # シャットダウン処理
     if message.content.strip() == "t!shutdown":
         if message.author.id in client.owner_ids:
-            channel = client.get_channel(notify_channel_id)
+            channel = client.get_channel(client.config["notify_channel_id"])
             if channel:
                 await channel.send("シャットダウンしました")
             logging.info("Botがシャットダウンされました")
@@ -129,7 +129,7 @@ async def on_message(message):
 
             msg = f"🔁 Cogの再読み込みが完了しました。\n✅ 成功: {len(success)} 件\n❌ 失敗: {len(failed)} 件"
             await message.channel.send(msg)
-            channel = client.get_channel(notify_channel_id)
+            channel = client.get_channel(client.config["notify_channel_id"])
             if channel:
                 await channel.send(msg)
             logging.info("再起動コマンドによるCogの再読み込み完了")
