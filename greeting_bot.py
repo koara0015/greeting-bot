@@ -4,7 +4,7 @@ import os
 import random
 import asyncio
 import logging  # ← loggingを使用して情報を出力
-import json  # ← roles.json 読み込み用
+import json  # ← ids.json 読み込み用
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
@@ -36,24 +36,18 @@ start_time = datetime.now()
 omikuji_usage = {}
 yamu_cooldowns = {}
 
-# ✅ ID設定
+# ✅ 固定のチャンネルID
 notify_channel_id = 1371322394719031396
 react_channel_id = 1125349326269452309
 
-# ✅ roles.jsonを読み込んで各種IDをセット
-with open("roles.json", "r", encoding="utf-8") as f:
-    roles_data = json.load(f)
+# ✅ ids.jsonを読み込んで各種IDをセット
+with open("ids.json", "r", encoding="utf-8") as f:
+    ids_data = json.load(f)
 
-owner_ids = roles_data.get("owner", [])
-admin_ids = roles_data.get("admin", [])
-moderator_ids = roles_data.get("moderator", [])
-vip_ids = roles_data.get("vip", [])
-
-# ✅ Botに持たせて使いやすくする
-client.owner_ids = owner_ids
-client.admin_ids = admin_ids
-client.moderator_ids = moderator_ids
-client.vip_ids = vip_ids
+client.owner_ids = ids_data.get("owner", [])
+client.admin_ids = ids_data.get("admin", [])
+client.moderator_ids = ids_data.get("moderator", [])
+client.vip_ids = ids_data.get("vip", [])
 
 # ✅ Bot起動時の処理
 @client.event
