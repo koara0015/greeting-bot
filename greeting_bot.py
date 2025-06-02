@@ -3,81 +3,59 @@ import discord
 import os
 import random
 import asyncio
-import logging  # ← 追加
+import logging  # ← loggingを使用して情報を出力
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 
-# ✅ loggingの設定（ログをターミナルやファイルに出力したいとき便利！）
+# ✅ loggingの設定（ログをターミナルやRailwayログで確認可能）
 logging.basicConfig(
-    level=logging.INFO,  # INFOレベル以上のログを表示
-    format="%(asctime)s [%(levelname)s] %(message)s",  # 表示フォーマット
-    datefmt="%Y-%m-%d %H:%M:%S"  # 日付フォーマット
+    level=logging.INFO,  # INFOレベル以上を表示
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# ✅ トークンを環境変数から取得（セキュリティのため）
+# ✅ トークンを環境変数から取得（.envにDISCORD_TOKENを設定する）
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# ✅ 必要な意図（intents）を設定
+# ✅ Discordの意図（intents）を設定
 intents = discord.Intents.default()
 intents.message_content = True
 intents.presences = True
 intents.members = True
 
-# ✅ Bot本体を作成（コマンドプレフィックスは「t!」、ヘルプは自作のためNone）
+# ✅ Bot本体を作成（接頭辞はt!）
 client = commands.Bot(command_prefix="t!", intents=intents, help_command=None)
 tree = client.tree
 
-# ✅ 起動時刻の記録
+# ✅ 起動時間記録
 start_time = datetime.now()
 
-# ✅ 使用履歴やクールダウンの管理辞書
+# ✅ 使用履歴などの辞書
 omikuji_usage = {}
 yamu_cooldowns = {}
 
-# ✅ 各種ID
+# ✅ ID設定
 notify_channel_id = 1371322394719031396
 react_channel_id = 1125349326269452309
 owner_id = 1150048383524941826
-
 admin_ids = [1150048383524941826, 1095693259403173949]
 moderator_ids = [1150048383524941826, 1095693259403173949, 1354645428095680563, 841603812548411412]
 vip_ids = [1150048383524941826]
-
-# ✅ Cogのリスト（再起動時にも使う）
-cogs_list = [
-    "cogs.ping",
-    "cogs.say",
-    "cogs.dm",
-    "cogs.tokumei",
-    "cogs.ai",
-    "cogs.user",
-    "cogs.admin",
-    "cogs.yamu",
-    "cogs.serverinfo",
-    "cogs.stats",
-    "cogs.chatgpt",
-    "cogs.mittyan",
-    "cogs.omikuji",
-    "cogs.help",
-    "cogs.autoresponder",
-    "cogs.reaction",
-    "cogs.unknown_command"
-]
 
 # ✅ Bot起動時の処理
 @client.event
 async def on_ready():
     await tree.sync()
-    logging.info(f'ログインしました：{client.user}')  # ← loggingで出力
+    logging.info(f'ログインしました：{client.user}')
     channel = client.get_channel(notify_channel_id)
     if channel:
         try:
             await channel.send("起動しました")
         except Exception as e:
-            logging.warning(f"チャンネルへの送信に失敗しました: {e}")  # ← warningで出力
+            logging.warning(f"チャンネルへの送信に失敗: {e}")
     else:
-        logging.warning("⚠️ 通知チャンネルが見つかりません")
+        logging.warning("通知チャンネルが見つかりません")
 
 # ✅ エラー処理
 @client.event
@@ -90,13 +68,13 @@ async def on_command_error(ctx, error):
         await ctx.send("🛑 権限がありません。")
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンド実行中にエラーが発生しました。")
-        logging.error(f"Command error: {error.original}")  # ← errorログ
+        logging.error(f"Command error: {error.original}")
         channel = client.get_channel(notify_channel_id)
         if channel:
             await channel.send(f"🔴 コマンドエラー: `{error.original}`")
     else:
         await ctx.send("⚠️ 不明なエラーが発生しました。")
-        logging.error(f"Unhandled error: {error}")  # ← errorログ
+        logging.error(f"Unhandled error: {error}")
         channel = client.get_channel(notify_channel_id)
         if channel:
             await channel.send(f"⚠️ 不明なエラー: `{error}`")
@@ -107,45 +85,48 @@ async def on_message(message):
     if message.author.bot:
         return
 
+    # DMメッセージの処理
     if isinstance(message.channel, discord.DMChannel):
         if message.content.startswith("t!tokumei"):
             pass
         else:
             return
 
+    # シャットダウン処理
     if message.content.strip() == "t!shutdown":
         if message.author.id == owner_id:
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send("シャットダウンしました")
-            logging.info("Botがシャットダウンされました")  # ← infoログ
+            logging.info("Botがシャットダウンされました")
             await client.close()
         else:
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
+    # 再起動処理（Cogを再読み込み）
     if message.content.strip() == "t!restart":
         if message.author.id == owner_id:
             success = []
             failed = []
 
-            for cog in cogs_list:
-                try:
-                    await client.unload_extension(cog)
-                    await client.load_extension(cog)
-                    success.append(cog)
-                except Exception as e:
-                    failed.append(f"{cog} → {e}")
-                    logging.error(f"❌ {cog} の再読み込みに失敗: {e}")  # ← エラーログ
+            for cog in os.listdir("./cogs"):
+                if cog.endswith(".py") and not cog.startswith("_"):
+                    cog_name = f"cogs.{cog[:-3]}"
+                    try:
+                        await client.unload_extension(cog_name)
+                        await client.load_extension(cog_name)
+                        success.append(cog_name)
+                    except Exception as e:
+                        failed.append(f"{cog_name} → {e}")
+                        logging.error(f"❌ {cog_name} の再読み込み失敗: {e}")
 
             msg = f"🔁 Cogの再読み込みが完了しました。\n✅ 成功: {len(success)} 件\n❌ 失敗: {len(failed)} 件"
             await message.channel.send(msg)
-
             channel = client.get_channel(notify_channel_id)
             if channel:
                 await channel.send(msg)
-
-            logging.info("🔁 再起動コマンドによるCog再読み込み完了")  # ← infoログ
+            logging.info("再起動コマンドによるCogの再読み込み完了")
             return
         else:
             await message.channel.send("🛑 オーナー専用コマンドです。")
@@ -153,20 +134,22 @@ async def on_message(message):
 
     await client.process_commands(message)
 
-# ✅ 最初のCog読み込み処理
+# ✅ Cogの自動読み込み
 @client.event
 async def setup_hook():
-    for cog in cogs_list:
-        try:
-            await client.load_extension(cog)
-            logging.info(f"✅ Cogロード成功: {cog}")  # ← infoログ
-        except Exception as e:
-            logging.error(f"❌ Cogロード失敗: {cog} → {e}")  # ← errorログ
+    for cog in os.listdir("./cogs"):
+        if cog.endswith(".py") and not cog.startswith("_"):
+            cog_name = f"cogs.{cog[:-3]}"
+            try:
+                await client.load_extension(cog_name)
+                logging.info(f"✅ Cogロード成功: {cog_name}")
+            except Exception as e:
+                logging.error(f"❌ Cogロード失敗: {cog_name} → {e}")
 
-# ✅ トークン未設定チェック
+# ✅ トークンチェック
 if not TOKEN:
-    logging.critical("❌ エラー: DISCORD_TOKEN が設定されていません。")  # ← criticalログ
+    logging.critical("❌ エラー: DISCORD_TOKEN が設定されていません。")
     exit()
 
-# ✅ Botを起動！
+# ✅ Bot起動！
 client.run(TOKEN)
