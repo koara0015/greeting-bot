@@ -1,11 +1,17 @@
 # ✅ 必要なライブラリをインポート
 import discord
 from discord.ext import commands
+import json  # ← 追加：config.json を読み込むため
 
 # ✅ SayCommand クラス（Cog）
 class SayCommand(commands.Cog):
     def __init__(self, bot):
         self.bot = bot  # Botインスタンス（main.pyのclient）を保持
+
+        # ✅ config.json から通知チャンネルIDを取得
+        with open("config.json", "r", encoding="utf-8") as f:
+            config = json.load(f)
+        self.notify_channel_id = config.get("notify_channel_id")
 
     # ✅ t!say コマンドの定義
     @commands.command(name="say")
@@ -66,7 +72,7 @@ class SayCommand(commands.Cog):
             await target_channel.send(message_text)
             await ctx.send("✅ メッセージを送信しました")
 
-            log_channel = self.bot.get_channel(1371322394719031396)  # 通知チャンネル固定ID
+            log_channel = self.bot.get_channel(self.notify_channel_id)  # ← 通知チャンネルIDをconfig.jsonから取得
             if log_channel:
                 embed = discord.Embed(title="📤 t!say 実行ログ", color=discord.Color.green())
                 embed.add_field(name="実行者", value=f"{ctx.author} (ID: {ctx.author.id})", inline=False)
