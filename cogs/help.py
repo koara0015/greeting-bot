@@ -6,7 +6,7 @@ class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # ✅ 共通の Embed を返す関数
+    # ✅ 共通の Embed を返す関数（t!help, /help 共用）
     def generate_help_embed(self):
         embed = discord.Embed(
             title="📘 ヘルプ - コマンド一覧",
@@ -50,7 +50,7 @@ class Help(commands.Cog):
 
         return embed
 
-    # ✅ t!help コマンド（モデレーターID または管理者権限）
+    # ✅ t!help（モデレーター以上）
     @commands.command(name="help", help="利用可能なコマンドの一覧を表示します（モデレーター以上）")
     async def help_command(self, ctx):
         if ctx.message.content.strip() != "t!help":
@@ -63,16 +63,9 @@ class Help(commands.Cog):
         embed = self.generate_help_embed()
         await ctx.send(embed=embed)
 
-    # ✅ /help スラッシュコマンド（管理権限 or モデレーターID）
-    @app_commands.command(name="help", description="Botのコマンド一覧を表示します（モデレーターまたは管理者）")
+    # ✅ /help（全員が使える）※表示は他人に見えない
+    @app_commands.command(name="help", description="Botのコマンド一覧を表示します（全員使用可）")
     async def slash_help(self, interaction: discord.Interaction):
-        if (
-            interaction.user.id not in self.bot.moderator_ids and
-            not interaction.user.guild_permissions.administrator
-        ):
-            await interaction.response.send_message("⚠️ モデレーター以上の権限が必要です。", ephemeral=True)
-            return
-
         embed = self.generate_help_embed()
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
