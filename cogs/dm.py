@@ -1,11 +1,17 @@
 # ✅ 必要なライブラリをインポート
 import discord
 from discord.ext import commands
+import json  # ← config.json を読み込むため追加
 
 # ✅ Adminクラス（Cog）として定義
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot  # Botインスタンスを保持（main.pyのclient）
+
+        # ✅ config.json から通知チャンネルIDを取得
+        with open("config.json", "r", encoding="utf-8") as f:
+            config = json.load(f)
+        self.notify_channel_id = config.get("notify_channel_id")
 
     # ✅ t!dm コマンド定義
     @commands.command(name="dm")
@@ -39,8 +45,8 @@ class Admin(commands.Cog):
             await dm_user.send(message)
             await ctx.send(f"✅ ユーザー {dm_user.name} にDMを送信しました。")
 
-            # ✅ ログ送信
-            log_channel = self.bot.get_channel(1371322394719031396)  # 通知チャンネルID（固定）
+            # ✅ ログ送信（config.jsonから取得した通知チャンネルIDを使用）
+            log_channel = self.bot.get_channel(self.notify_channel_id)
             if log_channel:
                 embed = discord.Embed(
                     title="📩 DM送信ログ",
