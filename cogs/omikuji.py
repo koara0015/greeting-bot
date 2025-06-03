@@ -44,7 +44,7 @@ class Omikuji(commands.Cog):
         # ✅ 結果の抽選（出現確率付き）
         choices = ["吉", "小吉", "末吉", "中吉", "凶", "大吉", "大凶", "特大凶", "たまご"]
         weights = [17, 19, 19, 19, 15, 4, 4, 2, 1]  # 合計 = 100
-        result = random.choices(choices, weights=weights, k=3)[0]
+        result = random.choices(choices, weights=weights, k=1)[0]
         comment = random.choice(fortunes[result])
 
         # ✅ 結果を送信
