@@ -11,7 +11,7 @@ from discord import app_commands
 
 # ✅ loggingの設定（ログをターミナルやRailwayログで確認可能）
 logging.basicConfig(
-    level=logging.INFO,  # INFOレベル以上を表示
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
@@ -32,6 +32,12 @@ with open("config.json", "r", encoding="utf-8") as f:
 client = commands.Bot(command_prefix=config["command_prefix"], intents=intents, help_command=None)
 tree = client.tree
 client.config = config  # ✅ Botインスタンスに設定を保持
+
+# ✅ config.jsonのチャンネルIDもBotに保持
+client.notify_channel_id = config.get("notify_channel_id")
+client.react_channel_id = config.get("react_channel_id")
+client.tokumei_channel_id = config.get("tokumei_channel_id")
+client.tokumei_log_channel_id = config.get("tokumei_log_channel_id")
 
 # ✅ 起動時間記録
 start_time = datetime.now()
@@ -54,7 +60,7 @@ client.vip_ids = ids_data.get("vip", [])
 async def on_ready():
     await tree.sync()
     logging.info(f'ログインしました：{client.user}')
-    channel = client.get_channel(client.config["notify_channel_id"])
+    channel = client.get_channel(client.notify_channel_id)
     if channel:
         try:
             await channel.send("起動しました")
@@ -75,13 +81,13 @@ async def on_command_error(ctx, error):
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンド実行中にエラーが発生しました。")
         logging.error(f"Command error: {error.original}")
-        channel = client.get_channel(client.config["notify_channel_id"])
+        channel = client.get_channel(client.notify_channel_id)
         if channel:
             await channel.send(f"🔴 コマンドエラー: `{error.original}`")
     else:
         await ctx.send("⚠️ 不明なエラーが発生しました。")
         logging.error(f"Unhandled error: {error}")
-        channel = client.get_channel(client.config["notify_channel_id"])
+        channel = client.get_channel(client.notify_channel_id)
         if channel:
             await channel.send(f"⚠️ 不明なエラー: `{error}`")
 
@@ -101,7 +107,7 @@ async def on_message(message):
     # シャットダウン処理
     if message.content.strip() == "t!shutdown":
         if message.author.id in client.owner_ids:
-            channel = client.get_channel(client.config["notify_channel_id"])
+            channel = client.get_channel(client.notify_channel_id)
             if channel:
                 await channel.send("シャットダウンしました")
             logging.info("Botがシャットダウンされました")
@@ -129,7 +135,7 @@ async def on_message(message):
 
             msg = f"🔁 Cogの再読み込みが完了しました。\n✅ 成功: {len(success)} 件\n❌ 失敗: {len(failed)} 件"
             await message.channel.send(msg)
-            channel = client.get_channel(client.config["notify_channel_id"])
+            channel = client.get_channel(client.notify_channel_id)
             if channel:
                 await channel.send(msg)
             logging.info("再起動コマンドによるCogの再読み込み完了")
