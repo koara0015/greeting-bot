@@ -3,12 +3,18 @@ import discord
 from discord.ext import commands
 import asyncio
 from datetime import datetime
+import json  # ← config.jsonを読み込むために追加
 
 # ✅ Yamuクラス（Cogとして定義）
 class Yamu(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cooldowns = {}  # 各ユーザーのクールダウン時間を記録
+
+        # ✅ config.json から通知チャンネルIDを読み込み
+        with open("config.json", "r", encoding="utf-8") as f:
+            config = json.load(f)
+        self.notify_channel_id = config.get("notify_channel_id")
 
     # ✅ t!yamu コマンドを定義
     @commands.command(name="yamu")
@@ -95,8 +101,8 @@ class Yamu(commands.Cog):
             await target_channel.send(line)
             await asyncio.sleep(0.1)
 
-        # ✅ 投稿ログを通知チャンネルに送信
-        log_channel = self.bot.get_channel(1371322394719031396)  # 通知チャンネルID（固定）
+        # ✅ 投稿ログを通知チャンネルに送信（config.jsonから取得したチャンネルを使用）
+        log_channel = self.bot.get_channel(self.notify_channel_id)
         if log_channel:
             await log_channel.send(f"病み構文を『{target_channel.name}』に投稿しました")
 
