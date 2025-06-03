@@ -1,31 +1,19 @@
-# ✅ 必要なライブラリをインポート
 import discord
 from discord.ext import commands
+from discord import app_commands
 
-# ✅ Help クラス（Cog）
 class Help(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot  # main.pyのclientを受け取る
+        self.bot = bot
 
-    @commands.command(name="help", help="利用可能なコマンドの一覧を表示します（モデレーター以上）")
-    async def help_command(self, ctx):
-        # ✅ 完全一致でないメッセージは無視
-        if ctx.message.content.strip() != "t!help":
-            return
-
-        # ✅ モデレーター以上のIDまたは管理者権限かをチェック
-        if ctx.author.id not in self.bot.moderator_ids and not ctx.author.guild_permissions.administrator:
-            await ctx.send("⚠️ モデレーター以上の権限が必要です。")
-            return
-
-        # ✅ Embedを作成
+    # ✅ 共通の Embed を返す関数
+    def generate_help_embed(self):
         embed = discord.Embed(
             title="📘 ヘルプ - コマンド一覧",
             description="たまごのお部屋専用Botコマンド一覧です。\n`t!コマンド名` で実行できます。",
             color=discord.Color.blurple()
         )
 
-        # ✅ 各カテゴリごとにコマンドを追加（手動で記述）
         embed.add_field(
             name="🛠 管理系コマンド",
             value=(
@@ -60,8 +48,34 @@ class Help(commands.Cog):
             inline=False
         )
 
+        return embed
+
+    # ✅ t!help コマンド（モデレーターID または管理者権限）
+    @commands.command(name="help", help="利用可能なコマンドの一覧を表示します（モデレーター以上）")
+    async def help_command(self, ctx):
+        if ctx.message.content.strip() != "t!help":
+            return
+
+        if ctx.author.id not in self.bot.moderator_ids and not ctx.author.guild_permissions.administrator:
+            await ctx.send("⚠️ モデレーター以上の権限が必要です。")
+            return
+
+        embed = self.generate_help_embed()
         await ctx.send(embed=embed)
 
-# ✅ Cogとして登録する関数
+    # ✅ /help スラッシュコマンド（管理権限 or モデレーターID）
+    @app_commands.command(name="help", description="Botのコマンド一覧を表示します（モデレーターまたは管理者）")
+    async def slash_help(self, interaction: discord.Interaction):
+        if (
+            interaction.user.id not in self.bot.moderator_ids and
+            not interaction.user.guild_permissions.administrator
+        ):
+            await interaction.response.send_message("⚠️ モデレーター以上の権限が必要です。", ephemeral=True)
+            return
+
+        embed = self.generate_help_embed()
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+
+# ✅ Cogとして登録
 async def setup(bot):
     await bot.add_cog(Help(bot))
