@@ -95,7 +95,7 @@ class Tokumei(commands.Cog):
                 await interaction.followup.send("⚠️ 匿名投稿チャンネルが見つかりませんでした。")
                 return
 
-            names = ["匿名A", "匿名B", "匿名C", "名無し", "？？？", "無名さん", "スラッシュコマンドで失礼します"]
+            names = ["匿名A", "匿名B", "匿名C", "匿名D", "名無し", "？？？", "無名さん", "スラッシュコマンドで失礼します", "風吹けば名無し", "みっちゃんの手下"]
             icons = ["https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"]
             anon_name = random.choice(names)
             anon_icon = random.choice(icons)
