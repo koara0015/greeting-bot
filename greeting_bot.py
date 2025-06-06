@@ -16,35 +16,37 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# ✅ トークンを取得
+# ✅ トークンを環境変数から取得（.envにDISCORD_TOKENを設定する）
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# ✅ intentsを設定
+# ✅ Discordの意図（intents）を設定
 intents = discord.Intents.default()
 intents.message_content = True
 intents.presences = True
 intents.members = True
 
-# ✅ config.jsonを読み込む
+# ✅ Bot本体を作成（接頭辞は config.json から取得）
 with open("config.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
 client = commands.Bot(command_prefix=config["command_prefix"], intents=intents, help_command=None)
 tree = client.tree
-client.config = config
+client.config = config  # ✅ Botインスタンスに設定を保持
 
-# ✅ チャンネルIDを保持
+# ✅ config.jsonのチャンネルIDもBotに保持
 client.notify_channel_id = config.get("notify_channel_id")
 client.react_channel_id = config.get("react_channel_id")
 client.tokumei_channel_id = config.get("tokumei_channel_id")
 client.tokumei_log_channel_id = config.get("tokumei_log_channel_id")
 
-# ✅ 起動時間記録・辞書
+# ✅ 起動時間記録
 start_time = datetime.now()
+
+# ✅ 使用履歴などの辞書
 omikuji_usage = {}
 yamu_cooldowns = {}
 
-# ✅ ids.jsonを読み込む
+# ✅ ids.jsonを読み込んで各種IDをセット
 with open("ids.json", "r", encoding="utf-8") as f:
     ids_data = json.load(f)
 
@@ -67,7 +69,7 @@ async def on_ready():
     else:
         logging.warning("通知チャンネルが見つかりません")
 
-# ✅ 通常コマンドのエラー処理
+# ✅ エラー処理
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
@@ -76,9 +78,6 @@ async def on_command_error(ctx, error):
         return
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("🛑 権限がありません。")
-    elif isinstance(error, commands.CommandOnCooldown):
-        retry_after = round(error.retry_after, 1)
-        await ctx.send(f"⏳ クールダウン中です。あと `{retry_after}` 秒お待ちください。")
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンド実行中にエラーが発生しました。")
         logging.error(f"Command error: {error.original}")
@@ -92,31 +91,20 @@ async def on_command_error(ctx, error):
         if channel:
             await channel.send(f"⚠️ 不明なエラー: `{error}`")
 
-# ✅ スラッシュコマンドのエラー処理（クールダウン対策あり）
-@client.tree.error
-async def on_app_command_error(interaction: discord.Interaction, error):
-    if isinstance(error, app_commands.CommandOnCooldown):
-        # ※ tokumei.py 側で既に処理してるので何もしない
-        return
-    elif isinstance(error, app_commands.CheckFailure):
-        return
-    logging.error(f"スラッシュコマンドエラー: {error}")
-    channel = client.get_channel(client.notify_channel_id)
-    if channel:
-        await channel.send(f"⚠️ スラッシュコマンドエラー: `{error}`")
-
 # ✅ メッセージ受信時の処理
 @client.event
 async def on_message(message):
     if message.author.bot:
         return
 
-    # ✅ DMのt!tokumei以外は無視
+    # DMメッセージの処理
     if isinstance(message.channel, discord.DMChannel):
-        if not message.content.startswith("t!tokumei"):
+        if message.content.startswith("t!tokumei"):
+            pass
+        else:
             return
 
-    # ✅ シャットダウン
+    # シャットダウン処理
     if message.content.strip() == "t!shutdown":
         if message.author.id in client.owner_ids:
             channel = client.get_channel(client.notify_channel_id)
@@ -128,7 +116,7 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # ✅ 再起動（Cog再読み込み）
+    # 再起動処理（Cogを再読み込み）
     if message.content.strip() == "t!restart":
         if message.author.id in client.owner_ids:
             success = []
@@ -158,7 +146,7 @@ async def on_message(message):
 
     await client.process_commands(message)
 
-# ✅ Cog自動読み込み
+# ✅ Cogの自動読み込み
 @client.event
 async def setup_hook():
     for cog in os.listdir("./cogs"):
