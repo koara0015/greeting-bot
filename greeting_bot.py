@@ -3,20 +3,20 @@ import discord
 import os
 import random
 import asyncio
-import logging  # ← loggingを使用して情報を出力
-import json  # ← config.json / ids.json 読み込み用
+import logging
+import json
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 
-# ✅ loggingの設定（ログをターミナルやRailwayログで確認可能）
+# ✅ loggingの設定（ターミナルやRailwayで確認）
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# ✅ トークンを環境変数から取得（.envにDISCORD_TOKENを設定する）
+# ✅ トークンを環境変数から取得
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 # ✅ Discordの意図（intents）を設定
@@ -25,24 +25,21 @@ intents.message_content = True
 intents.presences = True
 intents.members = True
 
-# ✅ Bot本体を作成（接頭辞は config.json から取得）
+# ✅ Bot本体を作成
 with open("config.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
 client = commands.Bot(command_prefix=config["command_prefix"], intents=intents, help_command=None)
 tree = client.tree
-client.config = config  # ✅ Botインスタンスに設定を保持
+client.config = config
 
-# ✅ config.jsonのチャンネルIDもBotに保持
+# ✅ 各種ID設定
 client.notify_channel_id = config.get("notify_channel_id")
 client.react_channel_id = config.get("react_channel_id")
 client.tokumei_channel_id = config.get("tokumei_channel_id")
 client.tokumei_log_channel_id = config.get("tokumei_log_channel_id")
 
-# ✅ 起動時間記録
 start_time = datetime.now()
-
-# ✅ 使用履歴などの辞書
 omikuji_usage = {}
 yamu_cooldowns = {}
 
@@ -69,7 +66,7 @@ async def on_ready():
     else:
         logging.warning("通知チャンネルが見つかりません")
 
-# ✅ エラー処理
+# ✅ 通常コマンドのエラー処理
 @client.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.MissingRequiredArgument):
@@ -90,6 +87,24 @@ async def on_command_error(ctx, error):
         channel = client.get_channel(client.notify_channel_id)
         if channel:
             await channel.send(f"⚠️ 不明なエラー: `{error}`")
+
+# ✅ スラッシュコマンドの共通エラー処理
+@tree.error
+async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.CommandOnCooldown):
+        # ✅ tokumei.py側で処理しているのでここでは無視
+        return
+
+    # ✅ その他のエラーのみ通知
+    try:
+        await interaction.followup.send(f"⚠️ 不明なエラー: `{error}`", ephemeral=True)
+    except:
+        if not interaction.response.is_done():
+            await interaction.response.send_message(f"⚠️ 不明なエラー: `{error}`", ephemeral=True)
+    logging.error(f"AppCommand error: {error}")
+    channel = client.get_channel(client.notify_channel_id)
+    if channel:
+        await channel.send(f"⚠️ スラッシュコマンドのエラー: `{error}`")
 
 # ✅ メッセージ受信時の処理
 @client.event
