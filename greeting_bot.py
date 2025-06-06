@@ -9,44 +9,42 @@ from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 
-# ✅ loggingの設定（ログをターミナルやRailwayログで確認可能）
+# ✅ loggingの設定
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# ✅ トークンを環境変数から取得（.envにDISCORD_TOKENを設定する）
+# ✅ トークンを取得
 TOKEN = os.getenv("DISCORD_TOKEN")
 
-# ✅ Discordの意図（intents）を設定
+# ✅ intentsを設定
 intents = discord.Intents.default()
 intents.message_content = True
 intents.presences = True
 intents.members = True
 
-# ✅ Bot本体を作成（接頭辞は config.json から取得）
+# ✅ config.jsonを読み込む
 with open("config.json", "r", encoding="utf-8") as f:
     config = json.load(f)
 
 client = commands.Bot(command_prefix=config["command_prefix"], intents=intents, help_command=None)
 tree = client.tree
-client.config = config  # ✅ Botインスタンスに設定を保持
+client.config = config
 
-# ✅ config.jsonのチャンネルIDもBotに保持
+# ✅ チャンネルIDを保持
 client.notify_channel_id = config.get("notify_channel_id")
 client.react_channel_id = config.get("react_channel_id")
 client.tokumei_channel_id = config.get("tokumei_channel_id")
 client.tokumei_log_channel_id = config.get("tokumei_log_channel_id")
 
-# ✅ 起動時間記録
+# ✅ 起動時間記録・辞書
 start_time = datetime.now()
-
-# ✅ 使用履歴などの辞書
 omikuji_usage = {}
 yamu_cooldowns = {}
 
-# ✅ ids.jsonを読み込んで各種IDをセット
+# ✅ ids.jsonを読み込む
 with open("ids.json", "r", encoding="utf-8") as f:
     ids_data = json.load(f)
 
@@ -91,25 +89,16 @@ async def on_command_error(ctx, error):
         if channel:
             await channel.send(f"⚠️ 不明なエラー: `{error}`")
 
-# ✅ スラッシュコマンド共通エラーハンドラー
-@tree.error
-async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
-    # ✅ tokumei.pyなどで処理済みのCommandOnCooldownは無視
+# ✅ スラッシュコマンドのエラー処理（クールダウン対策あり）
+@client.tree.error
+async def on_app_command_error(interaction: discord.Interaction, error):
     if isinstance(error, app_commands.CommandOnCooldown):
+        # ※ tokumei.py 側で既に処理してるので何もしない
         return
-
-    try:
-        if interaction.response.is_done():
-            await interaction.followup.send(f"⚠️ 不明なエラー: `{error}`", ephemeral=True)
-        else:
-            await interaction.response.send_message(f"⚠️ 不明なエラー: `{error}`", ephemeral=True)
-    except Exception as e:
-        logging.warning(f"⚠️ エラーメッセージの送信に失敗: {e}")
-
-    logging.error(f"AppCommand error: {error}")
+    logging.error(f"スラッシュコマンドエラー: {error}")
     channel = client.get_channel(client.notify_channel_id)
     if channel:
-        await channel.send(f"⚠️ スラッシュコマンドのエラー: `{error}`")
+        await channel.send(f"⚠️ スラッシュコマンドエラー: `{error}`")
 
 # ✅ メッセージ受信時の処理
 @client.event
@@ -117,14 +106,12 @@ async def on_message(message):
     if message.author.bot:
         return
 
-    # DMメッセージの処理
+    # ✅ DMのt!tokumei以外は無視
     if isinstance(message.channel, discord.DMChannel):
-        if message.content.startswith("t!tokumei"):
-            pass
-        else:
+        if not message.content.startswith("t!tokumei"):
             return
 
-    # シャットダウン処理
+    # ✅ シャットダウン
     if message.content.strip() == "t!shutdown":
         if message.author.id in client.owner_ids:
             channel = client.get_channel(client.notify_channel_id)
@@ -136,7 +123,7 @@ async def on_message(message):
             await message.channel.send("🛑 オーナー専用コマンドです。")
         return
 
-    # 再起動処理（Cogを再読み込み）
+    # ✅ 再起動（Cog再読み込み）
     if message.content.strip() == "t!restart":
         if message.author.id in client.owner_ids:
             success = []
@@ -166,7 +153,7 @@ async def on_message(message):
 
     await client.process_commands(message)
 
-# ✅ Cogの自動読み込み
+# ✅ Cog自動読み込み
 @client.event
 async def setup_hook():
     for cog in os.listdir("./cogs"):
