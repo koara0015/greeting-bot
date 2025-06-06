@@ -156,7 +156,7 @@ class Tokumei(commands.Cog):
             print(f"Webhookエラー: {e}")
             await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
 
-    # ✅ /tokumei クールダウンエラー処理
+    # ✅ /tokumei クールダウンエラー処理（2重エラー回避付き）
     @tokumei_slash_command.error
     async def tokumei_slash_command_error(self, interaction: discord.Interaction, error):
         if isinstance(error, app_commands.CommandOnCooldown):
@@ -166,7 +166,13 @@ class Tokumei(commands.Cog):
                 ephemeral=True
             )
         else:
-            raise error
+            try:
+                if not interaction.response.is_done():
+                    await interaction.response.send_message("⚠️ 不明なエラーが発生しました。", ephemeral=True)
+                else:
+                    await interaction.followup.send("⚠️ 不明なエラーが発生しました。", ephemeral=True)
+            except Exception as e:
+                print(f"エラーハンドラ内でさらにエラー: {e}")
 
 # ✅ Cog登録
 async def setup(bot):
