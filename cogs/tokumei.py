@@ -25,7 +25,7 @@ class Tokumei(commands.Cog):
             )
             return
 
-        # ✅ 匿名専用チャンネルでの投稿は削除→匿名再送信
+        # ✅ 匿名専用チャンネルでの投稿は削除→匿名再送信（クールダウン対象外）
         if message.channel.id == self.bot.config["tokumei_channel_id"]:
             content = message.content
             author = message.author
@@ -47,7 +47,7 @@ class Tokumei(commands.Cog):
                 await webhook.send(content, avatar_url=anon_icon)
                 await webhook.delete()
 
-                # ログ送信
+                # ✅ ログ送信
                 log_channel = self.bot.get_channel(self.bot.config["tokumei_log_channel_id"])
                 if log_channel:
                     embed = discord.Embed(title="📋 匿名メッセージログ", color=discord.Color.orange())
@@ -58,8 +58,9 @@ class Tokumei(commands.Cog):
             except Exception as e:
                 print(f"匿名チャンネル投稿エラー: {e}")
 
-    # ✅ t!tokumei（DM専用コマンド）
+    # ✅ t!tokumei（DM専用コマンド）に15秒のクールダウンを追加
     @commands.command(name="tokumei")
+    @commands.cooldown(1, 15, commands.BucketType.user)
     async def tokumei_dm_command(self, ctx, *, message: str = None):
         if ctx.guild is not None:
             await ctx.send("⚠️ このコマンドはDMでのみ使用できます。")
@@ -103,9 +104,10 @@ class Tokumei(commands.Cog):
         except Exception as e:
             await ctx.send(f"⚠️ エラーが発生しました: {e}")
 
-    # ✅ /tokumei（スラッシュコマンド）
+    # ✅ /tokumei（スラッシュコマンド）に15秒クールダウンを追加
     @app_commands.command(name="tokumei", description="匿名でメッセージを送信します（全員可）")
     @app_commands.describe(message="匿名で投稿したいメッセージ内容")
+    @app_commands.checks.cooldown(1, 15.0)  # 秒数指定（float型も可）
     async def tokumei_slash_command(self, interaction: discord.Interaction, message: str):
         await interaction.response.defer(ephemeral=True)
 
