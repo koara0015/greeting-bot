@@ -104,10 +104,19 @@ class Tokumei(commands.Cog):
         except Exception as e:
             await ctx.send(f"⚠️ エラーが発生しました: {e}")
 
+    # ✅ t!tokumei クールダウンエラー処理
+    @tokumei_dm_command.error
+    async def tokumei_dm_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            retry_after = round(error.retry_after, 1)
+            await ctx.send(f"⏳ クールダウン中です。あと `{retry_after}` 秒お待ちください。")
+        else:
+            raise error
+
     # ✅ /tokumei（スラッシュコマンド）に15秒クールダウンを追加
     @app_commands.command(name="tokumei", description="匿名でメッセージを送信します（全員可）")
     @app_commands.describe(message="匿名で投稿したいメッセージ内容")
-    @app_commands.checks.cooldown(1, 15.0)  # 秒数指定（float型も可）
+    @app_commands.checks.cooldown(1, 15.0)
     async def tokumei_slash_command(self, interaction: discord.Interaction, message: str):
         await interaction.response.defer(ephemeral=True)
 
@@ -146,6 +155,18 @@ class Tokumei(commands.Cog):
         except Exception as e:
             print(f"Webhookエラー: {e}")
             await interaction.followup.send("⚠️ 投稿に失敗しました。管理者にご連絡ください。")
+
+    # ✅ /tokumei クールダウンエラー処理
+    @tokumei_slash_command.error
+    async def tokumei_slash_command_error(self, interaction: discord.Interaction, error):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            retry_after = round(error.retry_after, 1)
+            await interaction.response.send_message(
+                f"⏳ クールダウン中です。あと `{retry_after}` 秒お待ちください。",
+                ephemeral=True
+            )
+        else:
+            raise error
 
 # ✅ Cog登録
 async def setup(bot):
