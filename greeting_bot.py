@@ -3,13 +3,13 @@ import discord
 import os
 import random
 import asyncio
-import logging
-import json
+import logging  # ← loggingを使用して情報を出力
+import json  # ← config.json / ids.json 読み込み用
 from datetime import datetime
 from discord.ext import commands
 from discord import app_commands
 
-# ✅ loggingの設定
+# ✅ loggingの設定（ログをターミナルやRailwayログで確認可能）
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -76,6 +76,9 @@ async def on_command_error(ctx, error):
         return
     elif isinstance(error, commands.MissingPermissions):
         await ctx.send("🛑 権限がありません。")
+    elif isinstance(error, commands.CommandOnCooldown):
+        retry_after = round(error.retry_after, 1)
+        await ctx.send(f"⏳ クールダウン中です。あと `{retry_after}` 秒お待ちください。")
     elif isinstance(error, commands.CommandInvokeError):
         await ctx.send("⚠️ コマンド実行中にエラーが発生しました。")
         logging.error(f"Command error: {error.original}")
@@ -94,6 +97,8 @@ async def on_command_error(ctx, error):
 async def on_app_command_error(interaction: discord.Interaction, error):
     if isinstance(error, app_commands.CommandOnCooldown):
         # ※ tokumei.py 側で既に処理してるので何もしない
+        return
+    elif isinstance(error, app_commands.CheckFailure):
         return
     logging.error(f"スラッシュコマンドエラー: {error}")
     channel = client.get_channel(client.notify_channel_id)
