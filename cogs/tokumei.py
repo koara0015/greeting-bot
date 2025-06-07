@@ -8,7 +8,7 @@ class Tokumei(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # ✅ on_message：匿名チャンネルでの直接投稿対応＋DM注意
+    # ✅ 匿名チャンネルでの直接投稿対応
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.bot:
@@ -25,29 +25,32 @@ class Tokumei(commands.Cog):
             )
             return
 
-        # ✅ 匿名専用チャンネルでの投稿は削除→匿名再送信
+        # ✅ 匿名チャンネルに直接投稿されたメッセージを処理
         if message.channel.id == self.bot.config["tokumei_channel_id"]:
             content = message.content
             author = message.author
 
+            # ✅ リンクや文字数チェック
+            if "http://" in content or "https://" in content or "discord.gg" in content:
+                return
+            if len(content) > 200:
+                return
+
             try:
-                await message.delete()
+                await message.delete()  # ✅ 投稿を削除
 
-                if "http://" in content or "https://" in content or "discord.gg" in content:
-                    return
-                if len(content) > 200:
-                    return
-
+                # ✅ 匿名名とアイコン
                 names = ["匿名A", "匿名B", "名無し", "？？？", "無名さん"]
                 icons = ["https://upload.wikimedia.org/wikipedia/commons/8/89/HD_transparent_picture.png"]
                 anon_name = random.choice(names)
                 anon_icon = random.choice(icons)
 
+                # ✅ Webhookで匿名投稿
                 webhook = await message.channel.create_webhook(name=anon_name)
                 await webhook.send(content, avatar_url=anon_icon)
                 await webhook.delete()
 
-                # ログ送信
+                # ✅ ログ送信
                 log_channel = self.bot.get_channel(self.bot.config["tokumei_log_channel_id"])
                 if log_channel:
                     embed = discord.Embed(title="📋 匿名メッセージログ", color=discord.Color.orange())
