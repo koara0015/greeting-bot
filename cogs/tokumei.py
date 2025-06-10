@@ -30,8 +30,10 @@ class Tokumei(commands.Cog):
             content = message.content
             author = message.author
 
-            # ✅ リンクや文字数チェック
+            # ✅ 禁止内容チェック（リンク・メンション・文字数）
             if "http://" in content or "https://" in content or "discord.gg" in content:
+                return
+            if "@everyone" in content or "@here" in content or "<@" in content:
                 return
             if len(content) > 200:
                 return
@@ -71,8 +73,12 @@ class Tokumei(commands.Cog):
         if not message:
             await ctx.send("使い方：t!tokumei [匿名で送りたいメッセージ]")
             return
+        # ✅ 禁止内容チェック（リンク・メンション・文字数）
         if "http://" in message or "https://" in message or "discord.gg" in message:
             await ctx.send("⚠️ 匿名メッセージにリンクは使えません。")
+            return
+        if "@everyone" in message or "@here" in message or "<@" in message:
+            await ctx.send("⚠️ メンション（@everyone, @here, ユーザー）は使えません。")
             return
         if len(message) > 200:
             await ctx.send("⚠️ メッセージは200文字以内にしてください。")
@@ -112,8 +118,12 @@ class Tokumei(commands.Cog):
     async def tokumei_slash_command(self, interaction: discord.Interaction, message: str):
         await interaction.response.defer(ephemeral=True)
 
+        # ✅ 禁止内容チェック（リンク・メンション・文字数）
         if "http://" in message or "https://" in message or "discord.gg" in message:
             await interaction.followup.send("⚠️ 匿名メッセージにリンクは使用できません。")
+            return
+        if "@everyone" in message or "@here" in message or "<@" in message:
+            await interaction.followup.send("⚠️ メンション（@everyone, @here, ユーザー）は使用できません。")
             return
         if len(message) > 200:
             await interaction.followup.send("⚠️ 匿名メッセージは200文字以内で送ってください。")
