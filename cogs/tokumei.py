@@ -31,7 +31,7 @@ class Tokumei(commands.Cog):
             author = message.author
 
             # ✅ リンクや文字数チェック
-            if "http://" in content or "https://" in content or "discord.gg" in content or "@everyone" in content or "@here" in content:
+            if "http://" in content or "https://" in content or "discord.gg" in content:
                 return
             if len(content) > 200:
                 return
