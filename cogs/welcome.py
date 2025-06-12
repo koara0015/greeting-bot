@@ -9,6 +9,10 @@ class Welcome(commands.Cog):
     # ✅ on_member_join：メンバー参加時に発火するイベント
     @commands.Cog.listener()
     async def on_member_join(self, member):
+        # ✅ たまごのお部屋以外では何もしない（サーバーIDチェック）
+        if member.guild.id != 1122825314377138217:
+            return
+
         try:
             # ✅ 送信するDMの内容（改行含む）
             message = (
