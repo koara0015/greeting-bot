@@ -15,23 +15,21 @@ class BanList(commands.Cog):
             await ctx.send("🛑 このコマンドはオーナーまたはアドミンのみ使用できます。")
             return
 
-        # ✅ 処理中の案内
         await ctx.send("📋 BANリストを取得中です...")
 
         try:
-            # ✅ サーバーからBANされたユーザーのリストを取得
-            bans = await ctx.guild.bans()
+            # ✅ 非同期ジェネレーターなので、async for で回収
+            bans = [entry async for entry in ctx.guild.bans()]
+
             if not bans:
                 await ctx.send("✅ 現在BANされているユーザーはいません。")
                 return
 
-            # ✅ 表示用メッセージを作成
             embed = discord.Embed(title="🚫 BANユーザー一覧", color=discord.Color.red())
 
-            for ban_entry in bans:
-                user = ban_entry.user
-                reason = ban_entry.reason if ban_entry.reason else "理由不明"
-                # ⚠️ BAN日時はAPIから直接取得できないので「取得時点の表示」のみになります
+            for entry in bans:
+                user = entry.user
+                reason = entry.reason if entry.reason else "理由不明"
                 embed.add_field(
                     name=f"{user}（{user.id}）",
                     value=f"理由: {reason}",
