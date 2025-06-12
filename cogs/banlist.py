@@ -1,4 +1,3 @@
-# ✅ 必要なライブラリをインポート
 import discord
 from discord.ext import commands
 
@@ -6,41 +5,44 @@ class BanList(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # ✅ banlistコマンド（オーナー/アドミン限定）
+    # ✅ t!banlist コマンド
     @commands.command(name="banlist")
     async def banlist(self, ctx):
-        # ✅ 実行者がオーナー or アドミンかを確認
-        author_id = ctx.author.id
-        if author_id not in self.bot.owner_ids and author_id not in self.bot.admin_ids:
-            await ctx.send("🛑 このコマンドはオーナーまたはアドミンのみ使用できます。")
+        # ✅ 権限チェック（オーナーまたはアドミンのみ）
+        if ctx.author.id not in self.bot.owner_ids and ctx.author.id not in self.bot.admin_ids:
+            await ctx.send("🛑 このコマンドはオーナーまたは管理者のみ使用できます。")
             return
 
-        await ctx.send("📋 BANリストを取得中です...")
-
         try:
-            # ✅ 非同期ジェネレーターなので、async for で回収
-            bans = [entry async for entry in ctx.guild.bans()]
-
+            bans = await ctx.guild.bans()
             if not bans:
-                await ctx.send("✅ 現在BANされているユーザーはいません。")
+                await ctx.send("✅ 現在、BANされているメンバーはいません。")
                 return
 
-            embed = discord.Embed(title="🚫 BANユーザー一覧", color=discord.Color.red())
+            # ✅ 25件ずつ分割してEmbedを送信
+            chunk_size = 25
+            for i in range(0, len(bans), chunk_size):
+                chunk = bans[i:i+chunk_size]
 
-            for entry in bans:
-                user = entry.user
-                reason = entry.reason if entry.reason else "理由不明"
-                embed.add_field(
-                    name=f"{user}（{user.id}）",
-                    value=f"理由: {reason}",
-                    inline=False
+                embed = discord.Embed(
+                    title="⛔ BANされたメンバー一覧",
+                    description=f"{len(bans)} 件のBAN記録があります。",
+                    color=discord.Color.red()
                 )
 
-            await ctx.send(embed=embed)
+                for ban_entry in chunk:
+                    user = ban_entry.user
+                    reason = ban_entry.reason or "理由なし"
+                    embed.add_field(
+                        name=f"{user}（ID: {user.id}）",
+                        value=f"理由: {reason}",
+                        inline=False
+                    )
+
+                await ctx.send(embed=embed)
 
         except Exception as e:
             await ctx.send(f"⚠️ BANリストの取得中にエラーが発生しました: {e}")
-            print(f"[BANLIST] エラー: {e}")
 
 # ✅ Cog登録
 async def setup(bot):
