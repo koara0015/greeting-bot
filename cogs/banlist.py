@@ -5,21 +5,23 @@ class BanList(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # ✅ t!banlist コマンド
     @commands.command(name="banlist")
     async def banlist(self, ctx):
-        # ✅ 権限チェック（オーナーまたはアドミンのみ）
+        # ✅ オーナーまたは管理者のみ使用可
         if ctx.author.id not in self.bot.owner_ids and ctx.author.id not in self.bot.admin_ids:
             await ctx.send("🛑 このコマンドはオーナーまたは管理者のみ使用できます。")
             return
 
         try:
-            bans = await ctx.guild.bans()
+            bans = []
+            async for ban in ctx.guild.bans():  # ✅ 非同期ジェネレーターの正しい使い方
+                bans.append(ban)
+
             if not bans:
                 await ctx.send("✅ 現在、BANされているメンバーはいません。")
                 return
 
-            # ✅ 25件ずつ分割してEmbedを送信
+            # ✅ 25件ずつEmbedで送信
             chunk_size = 25
             for i in range(0, len(bans), chunk_size):
                 chunk = bans[i:i+chunk_size]
