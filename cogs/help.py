@@ -20,6 +20,7 @@ class Help(commands.Cog):
                 "`t!say [チャンネル] [内容]` - 指定チャンネルにメッセージ送信\n"
                 "`t!dm [ユーザー] [内容]` - 指定ユーザーにDM送信\n"
                 "`t!yamu [チャンネル]` - 病み構文を送信（0.1秒ごと）\n"
+                "`t!banlist` - BAN者リストを出す\n"
                 "`t!shutdown` - Botを終了（オーナーのみ）\n"
                 "`t!restart` - Cogを再読み込み（オーナーのみ）"
             ),
