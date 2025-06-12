@@ -11,7 +11,7 @@ class UnknownCommand(commands.Cog):
         self.known_prefixes = [
             't!help', 't!say', 't!shutdown', 't!restart', 't!omikuji',
             't!yamu', 't!ai', 't!user', 't!stats', 't!mittyan', 't!serverinfo',
-            't!admin', 't!dm', 't!chatgpt', 't!tokumei', 't!avatar', 't!ping'
+            't!admin', 't!dm', 't!chatgpt', 't!tokumei', 't!avatar', 't!banlist', 't!ping'
         ]
 
     # ✅ メッセージ受信時に存在しないコマンドを検出
